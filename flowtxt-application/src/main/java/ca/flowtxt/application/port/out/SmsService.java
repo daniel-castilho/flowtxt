@@ -1,6 +1,6 @@
 package ca.flowtxt.application.port.out;
 
 public interface SmsService {
-    void sendMessage(final String fromNumber, final String toPhoneNumber, final String message);
+    String sendMessage(final String fromNumber, final String toPhoneNumber, final String content);
     void receiveMessage(final String payload);
 }
