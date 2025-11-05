@@ -17,6 +17,7 @@ public class Message {
     private UUID id;
     private Contact contact;
     private String content;
-    private String status; // PENDING, SENT, DELIVERED, FAILED
+    private MessageStatus status;
     private Instant timestamp;
+    private String sid;
 }
