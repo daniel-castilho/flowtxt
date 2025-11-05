@@ -23,15 +23,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class InfrastructureConfig {
 
-    // SMS Service
-    @Bean
-    public SmsService smsService(
-            @Value("${twilio.account-sid}") String accountSid,
-            @Value("${twilio.auth-token}") String authToken,
-            @Value("${twilio.phone-number}") String fromNumber) {
-        return new TwilioSmsAdapter(accountSid, authToken, fromNumber);
-    }
-
     // Redis Configuration
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
