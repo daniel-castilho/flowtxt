@@ -3,6 +3,7 @@ package ca.flowtxt.infrastructure.persistence;
 import ca.flowtxt.application.port.out.MessageRepository;
 import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.Message;
+import ca.flowtxt.domain.model.MessageStatus;
 import ca.flowtxt.infrastructure.persistence.mapper.MessageMapper;
 import org.springframework.stereotype.Repository;
 
@@ -38,5 +39,10 @@ public class MongoMessageRepositoryAdapter implements MessageRepository {
     @Override
     public Optional<Message> findById(final UUID id) {
         return repository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public void updateStatusBySid(String messageSid, MessageStatus status) {
+        repository.updateStatusBySid(messageSid, status);
     }
 }

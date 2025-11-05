@@ -2,9 +2,10 @@ package ca.flowtxt.infrastructure.sms;
 
 import ca.flowtxt.application.port.out.SmsService;
 import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 public class TwilioSmsAdapter implements SmsService {
@@ -21,60 +22,54 @@ public class TwilioSmsAdapter implements SmsService {
         this.authToken = authToken;
         this.fromNumber = fromNumber;
 
-        // Log the values being used (masking sensitive data)
-        String maskedAuthToken = authToken != null && authToken.length() > 4 
-            ? "****" + authToken.substring(authToken.length() - 4) 
-            : "****";
-            
-        log.info("Initializing Twilio with Account SID: {}", accountSid);
-        log.info("Using Auth Token: {}", maskedAuthToken);
-        log.info("From number: {}", fromNumber);
+        String maskedAuthToken = authToken != null && authToken.length() > 4
+                ? "****" + authToken.substring(authToken.length() - 4)
+                : "****";
+
+        log.info("Inicializando Twilio com Account SID: {}", accountSid);
+        log.info("Auth Token (mascarado): {}", maskedAuthToken);
+        log.info("Número de origem configurado: {}", fromNumber);
 
         try {
-            // Initialize Twilio client
             Twilio.init(accountSid, authToken);
-            log.info("Twilio client initialized successfully");
+            log.info("Cliente Twilio inicializado com sucesso");
         } catch (Exception e) {
-            log.error("Failed to initialize Twilio client: {}", e.getMessage(), e);
+            log.error("Falha ao inicializar cliente Twilio: {}", e.getMessage(), e);
             throw e;
         }
     }
 
     @Override
-    public void sendMessage(final String fromPhoneNumber, final String toPhoneNumber, final String content) {
-        log.info("Attempting to send SMS - From: {}, To: {}, Content: {}", fromPhoneNumber, toPhoneNumber, content);
-        
+    public String sendMessage(final String fromPhoneNumber, final String toPhoneNumber, final String content) {
+        log.info("Enviando SMS - De: {}, Para: {}, Conteúdo: {}", fromPhoneNumber, toPhoneNumber, content);
+
         try {
-            log.debug("Creating Twilio message...");
-            
-            var message = com.twilio.rest.api.v2010.account.Message.creator(
-                    new com.twilio.type.PhoneNumber(toPhoneNumber),
-                    new com.twilio.type.PhoneNumber(fromPhoneNumber),
+            log.debug("Criando mensagem Twilio...");
+            Message message = Message.creator(
+                    new PhoneNumber(toPhoneNumber),
+                    new PhoneNumber(fromPhoneNumber),
                     content
-            );
-            
-            log.debug("Sending message through Twilio...");
-            var result = message.create();
-            
-            log.info("SMS sent successfully. Message SID: {}", result.getSid());
-            return;
-            
+            ).create();
+
+            String sid = message.getSid();
+            log.info("SMS enviado com sucesso. SID da mensagem: {}", sid);
+            return sid;
+
         } catch (Exception e) {
-            log.error("Failed to send SMS. Error details:", e);
-            log.error("Error class: {}", e.getClass().getName());
-            log.error("Error message: {}", e.getMessage());
-            
+            log.error("Falha ao enviar SMS. Detalhes:", e);
+            log.error("Classe do erro: {}", e.getClass().getName());
+            log.error("Mensagem do erro: {}", e.getMessage());
+
             if (e.getCause() != null) {
-                log.error("Root cause: {}: {}", e.getCause().getClass().getName(), e.getCause().getMessage());
+                log.error("Causa raiz: {}: {}", e.getCause().getClass().getName(), e.getCause().getMessage());
             }
-            
-            throw new RuntimeException("Failed to send SMS: " + e.getMessage(), e);
+
+            throw new RuntimeException("Falha ao enviar SMS: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void receiveMessage(String payload) {
-        // TODO: Needs to implement Twilio webhook endpoint -> API Controller
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("Webhook de recebimento ainda não implementado");
     }
 }

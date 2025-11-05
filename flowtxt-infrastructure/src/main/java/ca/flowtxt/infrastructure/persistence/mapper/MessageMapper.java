@@ -12,9 +12,11 @@ import java.util.UUID;
 public interface MessageMapper {
 
     @Mapping(target = "contactId", source = "contact.id")
+    @Mapping(target = "sid", source = "sid")
     MessageDocument toDocument(Message message);
 
     @Mapping(target = "contact", expression = "java(mapContact(document.getContactId()))")
+    @Mapping(target = "sid", source = "sid")
     Message toDomain(MessageDocument document);
 
     // Helper method to map contactId to Contact (with minimal data)
