@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload production jar
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flowtxt-api-jar
           path: flowtxt-api/target/flowtxt-api-*.jar
@@ -102,7 +102,7 @@ jobs:
           output: sbom.cdx.json
 
       - name: Upload SBOM + image digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: sbom
