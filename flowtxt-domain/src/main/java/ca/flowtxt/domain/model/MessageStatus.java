@@ -7,6 +7,6 @@ public enum MessageStatus {
     DELIVERED,
     UNDELIVERED,
     FAILED,
-    RECEIVED, // opcional, se quiser rastrear mensagens recebidas
-    UNKNOWN   // fallback seguro
+    RECEIVED,
+    UNKNOWN
 }

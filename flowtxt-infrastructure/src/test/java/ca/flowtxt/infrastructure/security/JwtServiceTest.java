@@ -19,12 +19,12 @@ class JwtServiceTest {
     private final JwtService jwtService = new JwtService(SECRET, 3600000L);
 
     private User sampleUser() {
-        return User.builder()
-                .id(UUID.randomUUID())
-                .email("user@example.com")
-                .passwordHash("hash")
-                .role(Role.USER)
-                .build();
+        return new User(
+                UUID.randomUUID(),
+                "user@example.com",
+                "hash",
+                Role.USER,
+                java.time.Instant.now());
     }
 
     @Test

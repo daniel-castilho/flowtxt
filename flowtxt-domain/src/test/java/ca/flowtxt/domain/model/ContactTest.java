@@ -5,38 +5,50 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ContactTest {
 
     @Test
-    void shouldCreateContactWithValidPhoneNumber() {
-        // Arrange
-        var expectedId = UUID.randomUUID();
-        var expectedName = "Daniel Castilho";
-        var expectedPhoneNumber = "6477052644";
-        Contact contact = Contact.builder()
-                .id(expectedId)
-                .name(expectedName)
-                .phoneNumber(new PhoneNumber(expectedPhoneNumber))
-                .build();
+    void createGeneratesAnIdentityAndKeepsTheGivenData() {
+        Contact contact = Contact.create("Daniel Castilho", new PhoneNumber("6477052644"));
 
-        // Act & Assert
-        assertNotNull(contact);
-        assertEquals(expectedId, contact.getId());
-        assertEquals(expectedName, contact.getName());
-        assertEquals(expectedPhoneNumber, contact.getPhoneNumber().getValue());
+        assertNotNull(contact.getId());
+        assertEquals("Daniel Castilho", contact.getName());
+        assertEquals("6477052644", contact.getPhoneNumber().getValue());
+    }
+
+    @Test
+    void rejectsABlankName() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Contact.create("   ", new PhoneNumber("6477052644")));
+    }
+
+    @Test
+    void rejectsANullPhoneNumber() {
+        assertThrows(IllegalArgumentException.class, () -> Contact.create("Daniel", null));
+    }
+
+    @Test
+    void equalityIsByIdentityNotByFieldState() {
+        UUID id = UUID.randomUUID();
+        Contact original = new Contact(id, "Daniel Castilho", new PhoneNumber("6477052644"));
+        Contact reloaded = new Contact(id, "Different Name", new PhoneNumber("+15550001111"));
+
+        assertEquals(original, reloaded);
+        assertEquals(original.hashCode(), reloaded.hashCode());
+
+        Contact other = Contact.create("Daniel Castilho", new PhoneNumber("6477052644"));
+        assertNotEquals(original, other);
     }
 
     @Test
     void shouldThrowExceptionForEmptyPhoneNumber() {
-        // Arrange
-        var expectedPhoneNumber = "";
         var expectedErrorMessage = "Phone number cannot be null or blank";
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> new PhoneNumber(expectedPhoneNumber), expectedErrorMessage);
+        assertThrows(IllegalArgumentException.class,
+                () -> new PhoneNumber(""), expectedErrorMessage);
     }
-
 }

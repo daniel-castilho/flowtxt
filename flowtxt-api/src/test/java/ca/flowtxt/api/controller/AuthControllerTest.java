@@ -47,11 +47,9 @@ class AuthControllerTest {
 
     @Test
     void registerReturnsCreatedWithAToken() throws Exception {
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .email("user@example.com")
-                .role(Role.USER)
-                .build();
+        User user = new User(
+                UUID.randomUUID(), "user@example.com", "stored-hash", Role.USER,
+                java.time.Instant.now());
         when(registerUserUseCase.register(any(), any())).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn("jwt-token");
 
@@ -67,11 +65,9 @@ class AuthControllerTest {
 
     @Test
     void loginReturnsOkWithAToken() throws Exception {
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .email("user@example.com")
-                .role(Role.USER)
-                .build();
+        User user = new User(
+                UUID.randomUUID(), "user@example.com", "stored-hash", Role.USER,
+                java.time.Instant.now());
         when(authenticateUserUseCase.authenticate(any(), any())).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn("jwt-token");
 

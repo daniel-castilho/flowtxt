@@ -3,11 +3,8 @@ package ca.flowtxt.application.usecase;
 import ca.flowtxt.application.port.in.RegisterUserUseCase;
 import ca.flowtxt.application.port.out.UserRepository;
 import ca.flowtxt.domain.model.PasswordHasher;
-import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
 
-import java.time.Instant;
-import java.util.UUID;
 
 public class RegisterUserUseCaseImpl implements RegisterUserUseCase {
 
@@ -37,14 +34,7 @@ public class RegisterUserUseCaseImpl implements RegisterUserUseCase {
             throw new IllegalArgumentException("Email is already registered");
         }
 
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .email(normalizedEmail)
-                .passwordHash(passwordHasher.hash(rawPassword))
-                .role(Role.USER)
-                .createdAt(Instant.now())
-                .build();
-
+        User user = User.register(normalizedEmail, passwordHasher.hash(rawPassword));
         userRepository.save(user);
         return user;
     }

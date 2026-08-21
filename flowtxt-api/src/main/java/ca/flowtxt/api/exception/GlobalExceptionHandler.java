@@ -31,6 +31,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    // State conflict: e.g. an out-of-order provider callback that would move a
+    // delivered/failed message backwards in its lifecycle.
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleStateConflict(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
     // Generic Exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {

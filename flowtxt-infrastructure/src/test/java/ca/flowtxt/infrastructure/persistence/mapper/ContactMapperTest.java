@@ -15,11 +15,10 @@ class ContactMapperTest {
 
     @Test
     void mapsContactToDocument() {
-        Contact contact = Contact.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                .name("Maria Silva")
-                .phoneNumber(new PhoneNumber("+5511999999999"))
-                .build();
+        Contact contact = new Contact(
+                UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                "Maria Silva",
+                new PhoneNumber("+5511999999999"));
 
         ContactDocument doc = mapper.toDocument(contact);
 
@@ -32,14 +31,14 @@ class ContactMapperTest {
     void mapsDocumentBackToContact() {
         ContactDocument doc = ContactDocument.builder()
                 .id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                .name("João Souza")
+                .name("John Souza")
                 .phoneNumber("+5511888888888")
                 .build();
 
         Contact contact = mapper.toContact(doc);
 
         assertEquals(doc.getId(), contact.getId());
-        assertEquals("João Souza", contact.getName());
+        assertEquals("John Souza", contact.getName());
         assertEquals("+5511888888888", contact.getPhoneNumber().getValue());
     }
 }

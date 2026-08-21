@@ -16,13 +16,12 @@ class UserMapperTest {
 
     @Test
     void mapsUserToDocument() {
-        User user = User.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000021"))
-                .email("user@example.com")
-                .passwordHash("$2a$10$hash")
-                .role(Role.USER)
-                .createdAt(Instant.parse("2026-08-21T10:00:00Z"))
-                .build();
+        User user = new User(
+                UUID.fromString("00000000-0000-0000-0000-000000000021"),
+                "user@example.com",
+                "$2a$10$hash",
+                Role.USER,
+                Instant.parse("2026-08-21T10:00:00Z"));
 
         UserDocument doc = mapper.toDocument(user);
 

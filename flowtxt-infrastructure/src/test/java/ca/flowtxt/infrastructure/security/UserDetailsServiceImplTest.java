@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,11 +27,12 @@ class UserDetailsServiceImplTest {
 
     @Test
     void loadsAUserWithItsRoleAuthority() {
-        User user = User.builder()
-                .email("user@example.com")
-                .passwordHash("hashed")
-                .role(Role.USER)
-                .build();
+        User user = new User(
+                UUID.randomUUID(),
+                "user@example.com",
+                "hashed",
+                Role.USER,
+                java.time.Instant.now());
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
 
         UserDetails details =

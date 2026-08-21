@@ -57,7 +57,7 @@ class RegisterUserUseCaseImplTest {
     @Test
     void rejectsDuplicateEmail() {
         when(userRepository.findByEmail("taken@example.com"))
-                .thenReturn(Optional.of(User.builder().email("taken@example.com").build()));
+                .thenReturn(Optional.of(User.register("taken@example.com", "stored-hash")));
 
         assertThrows(IllegalArgumentException.class,
                 () -> useCase.register("taken@example.com", "strongpass123"));

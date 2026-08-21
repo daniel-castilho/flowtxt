@@ -45,6 +45,17 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void mapsStateConflictsToConflict() {
+        ResponseEntity<String> response =
+                handler.handleStateConflict(new IllegalStateException(
+                        "Invalid message status transition from DELIVERED to SENT"));
+
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals("Invalid message status transition from DELIVERED to SENT",
+                response.getBody());
+    }
+
+    @Test
     void mapsUnexpectedExceptionsToInternalServerError() {
         ResponseEntity<String> response =
                 handler.handleException(new RuntimeException("boom"));

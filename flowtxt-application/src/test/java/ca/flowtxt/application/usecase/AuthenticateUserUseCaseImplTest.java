@@ -2,7 +2,6 @@ package ca.flowtxt.application.usecase;
 
 import ca.flowtxt.application.port.out.UserRepository;
 import ca.flowtxt.domain.model.PasswordHasher;
-import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,12 +33,7 @@ class AuthenticateUserUseCaseImplTest {
 
     @Test
     void authenticatesWithValidCredentials() {
-        User stored = User.builder()
-                .id(UUID.randomUUID())
-                .email("user@example.com")
-                .passwordHash("hashed-value")
-                .role(Role.USER)
-                .build();
+        User stored = User.register("user@example.com", "hashed-value");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(stored));
         when(passwordHasher.matches("correct-password", "hashed-value")).thenReturn(true);
 
@@ -59,10 +52,7 @@ class AuthenticateUserUseCaseImplTest {
 
     @Test
     void rejectsWrongPassword() {
-        User stored = User.builder()
-                .email("user@example.com")
-                .passwordHash("hashed-value")
-                .build();
+        User stored = User.register("user@example.com", "hashed-value");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(stored));
         when(passwordHasher.matches("wrong-password", "hashed-value")).thenReturn(false);
 
