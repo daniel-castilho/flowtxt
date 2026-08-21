@@ -77,6 +77,12 @@ All notable changes to this project are documented in this file. The format is b
 - `application.yaml` re-enables Spring Security; JWT configuration added
   (`jwt.secret` dev placeholder, `jwt.expiration-ms`).
 
+### Fixed
+- **CI quality gates could not run**: `ci.yml` invoked `jacoco:check`, `spotbugs:check` and
+  `dependency-check:check` as direct plugin goals, which resolve cross-module artifacts from the
+  local repository rather than the reactor — a fresh runner had no installed modules, so the
+  pipeline failed on module ordering. An `install -DskipTests` pass now precedes the gates.
+
 ### Removed
 - Dead code: orphan `ca.flowtxt.persistence.MongoContactRepository` interface (duplicated
   `SpringDataContactRepository`, never referenced) and the unused

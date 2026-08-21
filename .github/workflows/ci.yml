@@ -26,6 +26,13 @@ jobs:
       - name: Unit tests
         run: ./mvnw test
 
+      # Direct plugin goals (jacoco/spotbugs/dependency-check) resolve
+      # cross-module artifacts from the local repository, not the reactor,
+      # so a fresh runner needs an install pass before they can run.
+      - name: Install reactor artifacts
+        if: success()
+        run: ./mvnw -B install -DskipTests
+
       - name: JaCoCo coverage check
         if: success()
         run: ./mvnw jacoco:check

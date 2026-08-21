@@ -96,10 +96,6 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
   under `anyRequest().authenticated()`, so Twilio callbacks (which send no bearer token) would
   be rejected with 401. Needs an explicit rule plus Twilio request-signature validation
   (`X-Twilio-Signature`) before production use.
-- `ci.yml` invokes `spotbugs:check` and other plugin goals directly without an earlier
-  `install`/`package` step: cross-module artifacts cannot resolve in that mode, so the CI
-  SpotBugs step fails on module ordering even though the analysis is clean locally
-  (`./mvnw install -DskipTests && ./mvnw spotbugs:check`). Pipeline fix needed.
 - Persistence documents (`ContactDocument`, `MessageDocument`, `UserDocument`) still use Lombok
   `@Data`; domain models are already rich immutable classes — Phase C will convert documents to
   records and drop the dependency.
@@ -117,7 +113,8 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
 > classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test
 > container lifecycle fixed (singleton containers); missing-token responses corrected from 403
-> to 401; JaCoCo minimum raised 0.10 → 0.40. See CHANGELOG.
+> to 401; JaCoCo minimum raised 0.10 → 0.40; CI now installs reactor artifacts before the
+> direct-goal quality gates. See CHANGELOG.
 
 ## Notes
 
