@@ -92,14 +92,32 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 
 ## Known technical debt (resolve later; flag, don't silently fix)
 
-- Legacy Portuguese comments in the original code (pre-English-only rule) — being translated
-  incrementally.
+- `/webhook/twilio/**` has no explicit authorization rule in `SecurityConfig`: it currently falls
+  under `anyRequest().authenticated()`, so Twilio callbacks (which send no bearer token) would
+  be rejected with 401. Needs an explicit rule plus Twilio request-signature validation
+  (`X-Twilio-Signature`) before production use.
+- `ci.yml` invokes `spotbugs:check` and other plugin goals directly without an earlier
+  `install`/`package` step: cross-module artifacts cannot resolve in that mode, so the CI
+  SpotBugs step fails on module ordering even though the analysis is clean locally
+  (`./mvnw install -DskipTests && ./mvnw spotbugs:check`). Pipeline fix needed.
+- Persistence documents (`ContactDocument`, `MessageDocument`, `UserDocument`) still use Lombok
+  `@Data`; domain models are already rich immutable classes — Phase C will convert documents to
+  records and drop the dependency.
+- `CacheService.put` / `RedisCacheAdapter` set no TTL, violating coding-standards §6 ("always
+  set a TTL"); keys can live forever.
+- `SendMessageUseCaseImpl` persists twice by design (PENDING audit trail, then SENT/FAILED);
+  provider failures are handled with a FAILED transition since 2026-08-21.
+- `AuthController` injects the infrastructure `JwtService` directly instead of going through an
+  application port (api→infrastructure coupling beyond the composition root).
 - `PhoneNumber` validation is minimal (E.164-ish regex lives in the DTO; a domain-level value
   object validation with full E.164 is a candidate improvement).
-- The Twilio status webhook endpoint (receiving delivery status) is not implemented yet —
-  `SmsService.receiveMessage` is a stub.
 - No rate limiting on `/auth/login` (a Redis-backed limiter is a candidate).
-- JaCoCo line coverage target is a modest 0.10 today; raise it as tests expand.
+
+> Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
+> Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
+> classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test
+> container lifecycle fixed (singleton containers); missing-token responses corrected from 403
+> to 401; JaCoCo minimum raised 0.10 → 0.40. See CHANGELOG.
 
 ## Notes
 

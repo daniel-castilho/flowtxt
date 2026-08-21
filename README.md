@@ -141,10 +141,16 @@ Interactive docs (Swagger UI): http://localhost:8080/swagger-ui.html.
 | `/auth/login` | `POST` | public | Authenticate, returns a JWT. |
 | `/contacts` | `POST` | JWT | Register a contact. |
 | `/messages` | `POST` | JWT | Send an SMS to a contact. |
+| `/webhook/twilio/status` | `POST` | see debt¹ | Receives Twilio delivery-status callbacks and updates message status. |
+
+> ¹ Implemented but currently caught by the catch-all `anyRequest().authenticated()` rule:
+> Twilio does not send a bearer token, so callbacks would be rejected until an explicit
+> authorization rule with Twilio request-signature validation lands (tracked in AGENTS.md
+> "Known technical debt").
 
 ## Testing
 
-Pyramid of **39 unit tests** (domain → application → infrastructure → API slice) plus
+Pyramid of **60 unit tests** (domain → application → infrastructure → API slice) plus
 **6 integration tests** (`*IT`, Testcontainers with real MongoDB + Redis) covering repository
 adapters, the cache and the end-to-end security flow. Full guidance:
 [docs/testing-playbook.md](docs/testing-playbook.md).
@@ -162,19 +168,31 @@ adapters, the cache and the end-to-end security flow. Full guidance:
 
 ## Current State
 
-- JWT auth (register/login + protected routes), user persistence in Mongo.
-- Contact + message flow with Mongo persistence and Twilio/fake SMS adapters (status model
-  `MessageStatus`).
-- Quality gates + full CI/CD (unit, `*IT`, image with non-root check, Trivy, SBOM) and
-  governance docs (AGENTS, coding-standards, testing-playbook, lessons, twelve-factor, ADR-0001).
-- 39 unit tests + 6 integration tests; Maven wrapper; Dockerfile (non-root); Redis in compose.
+- JWT auth (register/login + protected routes; missing tokens get a proper 401), user
+  persistence in Mongo.
+- **Rich immutable domain model**: entities with behaviour (`Message` guards its forward-only
+  status lifecycle; invalid transitions map to HTTP 409), factories instead of builders,
+  equality by identity. No setters anywhere in the domain.
+- Contact + message flow with Mongo persistence and Twilio/fake SMS adapters; provider
+  failures now transition the message to `FAILED`.
+- Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
+  `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route authorization for
+  Twilio callbacks still pending (see AGENTS debt).
+- Quality gates green locally: unit tests, SpotBugs (all modules), JaCoCo ≥ 0.40 per module
+  (actual: domain 94.6%, application 88.2%, infrastructure 52.5%, api 45.5%), full CI/CD and
+  governance docs.
+- 60 unit tests + 6 integration tests; Maven wrapper; Dockerfile (non-root); Redis in compose.
+- Sources are 100% English (identifiers, comments, logs); legacy Portuguese comments removed.
 
 ## Roadmap
 
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
-- Twilio delivery-status webhook endpoint (`SmsService.receiveMessage` is a stub).
+- Explicit authorization rule + Twilio request-signature validation for
+  `/webhook/twilio/**` (currently behind the JWT catch-all — callbacks would 401).
 - Rate limiting on `/auth/login` (Redis-backed).
+- TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
+- Purge Lombok from the persistence documents (records) and remove the dependency (Phase C).
 - `PhoneNumber` full E.164 validation in the domain value object.
 - Fail-fast configuration validation at boot (12-factor factor 3).
-- Raise the JaCoCo coverage target as the suite grows.
+- Raise the JaCoCo coverage target further (0.40 → 0.50+) as the suite grows.

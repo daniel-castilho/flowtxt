@@ -4,10 +4,13 @@ Candidate backlog, ordered by value/risk. Status: **open** unless noted.
 
 | # | Item | Why | Status |
 | - | ---- | --- | ------ |
-| 1 | Twilio delivery-status webhook endpoint (`SmsService.receiveMessage` stub → real endpoint + DTO wiring) | Close the message lifecycle | open |
+| 1a | Twilio delivery-status webhook endpoint | Close the message lifecycle | **done** (2026-08-21): controller + `UpdateMessageStatusUseCase` + Mongo update shipped |
+| 1b | Explicit authorization rule + Twilio request-signature validation for `/webhook/twilio/**` (currently behind the JWT catch-all → callbacks would 401) | Make the webhook actually usable and tamper-proof | open |
 | 2 | Rate limiting on `/auth/login` (Redis-backed fixed window) | Brute-force protection | open |
 | 3 | `PhoneNumber` full E.164 validation in the domain value object | Domain integrity | open |
 | 4 | Fail-fast config validation at boot (12-factor factor 3) | Production safety | open |
-| 5 | Raise JaCoCo coverage target (0.10 → 0.50+) as tests expand | Quality bar | open |
+| 4b | TTL support on `CacheService.put` / Redis adapter (coding-standards §6) | Cache hygiene / unbounded keys risk | open |
+| 5 | Raise JaCoCo coverage target | Quality bar | **done** (2026-08-21): 0.10 → 0.40 per module; next step 0.50+ |
+| 5b | Purge Lombok from persistence documents (records) and drop the dependency (Phase C) | Consistency with the rich immutable domain | open |
 | 6 | Release tagging/rollout convention (image + jar per commit) | Operability | open |
 | 7 | `scripts/` for admin/one-off operations (e.g. seed data) | Operability | open |
