@@ -22,23 +22,22 @@ class ContactMapperTest {
 
         ContactDocument doc = mapper.toDocument(contact);
 
-        assertEquals(contact.getId(), doc.getId());
-        assertEquals("Maria Silva", doc.getName());
-        assertEquals("+5511999999999", doc.getPhoneNumber());
+        assertEquals(contact.getId(), doc.id());
+        assertEquals("Maria Silva", doc.name());
+        assertEquals("+5511999999999", doc.phoneNumber());
     }
 
     @Test
     void mapsDocumentBackToContact() {
-        ContactDocument doc = ContactDocument.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                .name("John Souza")
-                .phoneNumber("+5511888888888")
-                .build();
+        ContactDocument doc = new ContactDocument(
+                UUID.fromString("00000000-0000-0000-0000-000000000002"),
+                "John Souza",
+                "+5511888888888");
 
         Contact contact = mapper.toContact(doc);
 
-        assertEquals(doc.getId(), contact.getId());
+        assertEquals(doc.id(), contact.getId());
         assertEquals("John Souza", contact.getName());
-        assertEquals("+5511888888888", contact.getPhoneNumber().getValue());
+        assertEquals("+5511888888888", contact.getPhoneNumber().value());
     }
 }

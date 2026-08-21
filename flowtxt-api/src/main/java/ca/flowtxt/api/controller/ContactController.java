@@ -29,7 +29,7 @@ public class ContactController {
         return ResponseEntity.ok(new ContactResponse(
                 contact.getId().toString(),
                 contact.getName(),
-                contact.getPhoneNumber().getValue()
+                contact.getPhoneNumber().value()
         ));
     }
 }

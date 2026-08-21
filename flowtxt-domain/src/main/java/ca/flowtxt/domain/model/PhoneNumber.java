@@ -1,16 +1,14 @@
 package ca.flowtxt.domain.model;
 
-import lombok.Value;
+/**
+ * Phone number value object. Immutable and validated at construction;
+ * full E.164 validation is tracked as a backlog improvement.
+ */
+public record PhoneNumber(String value) {
 
-@Value
-public class PhoneNumber {
-    String value;
-
-    public PhoneNumber(String value) {
+    public PhoneNumber {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Phone number cannot be null or blank");
         }
-        // TODO: Add phone number validation by regex
-        this.value = value;
     }
 }

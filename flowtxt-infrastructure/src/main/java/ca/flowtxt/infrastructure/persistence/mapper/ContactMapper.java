@@ -16,7 +16,7 @@ public interface ContactMapper {
 
     // PhoneNumber → String
     default String map(PhoneNumber phoneNumber) {
-        return phoneNumber != null ? phoneNumber.getValue() : null;
+        return phoneNumber != null ? phoneNumber.value() : null;
     }
 
     // String → PhoneNumber

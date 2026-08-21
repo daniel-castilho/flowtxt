@@ -17,7 +17,7 @@ class ContactTest {
 
         assertNotNull(contact.getId());
         assertEquals("Daniel Castilho", contact.getName());
-        assertEquals("6477052644", contact.getPhoneNumber().getValue());
+        assertEquals("6477052644", contact.getPhoneNumber().value());
     }
 
     @Test

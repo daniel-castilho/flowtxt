@@ -4,11 +4,12 @@ import ca.flowtxt.application.port.out.SmsService;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
-@Slf4j
 public final class TwilioSmsAdapter implements SmsService {
+
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(TwilioSmsAdapter.class);
 
     private final String accountSid;
     private final String authToken;

@@ -14,7 +14,6 @@
 
     <properties>
         <java.version>21</java.version>
-        <lombok.version>1.18.32</lombok.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <mockito.version>5.8.0</mockito.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,14 +24,6 @@
             <groupId>ca.flowtxt</groupId>
             <artifactId>flowtxt-domain</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Tests -->
@@ -59,11 +50,6 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>

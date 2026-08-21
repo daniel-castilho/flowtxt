@@ -25,32 +25,31 @@ class MessageMapperTest {
 
         MessageDocument doc = mapper.toDocument(message);
 
-        assertEquals(message.getId(), doc.getId());
-        assertEquals(contactId, doc.getContactId());
-        assertEquals("Hello!", doc.getContent());
-        assertEquals(MessageStatus.SENT, doc.getStatus());
-        assertEquals(now, doc.getTimestamp());
-        assertEquals("SM123", doc.getSid());
+        assertEquals(message.getId(), doc.id());
+        assertEquals(contactId, doc.contactId());
+        assertEquals("Hello!", doc.content());
+        assertEquals(MessageStatus.SENT, doc.status());
+        assertEquals(now, doc.timestamp());
+        assertEquals("SM123", doc.sid());
     }
 
     @Test
     void mapsDocumentBackToMessage() {
-        MessageDocument doc = MessageDocument.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000013"))
-                .contactId(UUID.fromString("00000000-0000-0000-0000-000000000014"))
-                .content("Hi")
-                .status(MessageStatus.PENDING)
-                .timestamp(Instant.parse("2026-08-21T10:00:00Z"))
-                .sid("SM456")
-                .build();
+        MessageDocument doc = new MessageDocument(
+                UUID.fromString("00000000-0000-0000-0000-000000000013"),
+                UUID.fromString("00000000-0000-0000-0000-000000000014"),
+                "Hi",
+                MessageStatus.PENDING,
+                Instant.parse("2026-08-21T10:00:00Z"),
+                "SM456");
 
         Message message = mapper.toDomain(doc);
 
-        assertEquals(doc.getId(), message.getId());
-        assertEquals(doc.getContactId(), message.getContactId());
-        assertEquals(doc.getContent(), message.getContent());
-        assertEquals(doc.getStatus(), message.getStatus());
-        assertEquals(doc.getTimestamp(), message.getTimestamp());
-        assertEquals(doc.getSid(), message.getSid());
+        assertEquals(doc.id(), message.getId());
+        assertEquals(doc.contactId(), message.getContactId());
+        assertEquals(doc.content(), message.getContent());
+        assertEquals(doc.status(), message.getStatus());
+        assertEquals(doc.timestamp(), message.getTimestamp());
+        assertEquals(doc.sid(), message.getSid());
     }
 }

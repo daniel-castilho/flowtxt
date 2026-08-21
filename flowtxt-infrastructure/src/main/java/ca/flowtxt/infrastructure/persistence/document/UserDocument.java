@@ -1,27 +1,21 @@
 package ca.flowtxt.infrastructure.persistence.document;
 
 import ca.flowtxt.domain.model.Role;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * MongoDB representation of a {@code ca.flowtxt.domain.model.User}. The
+ * password is stored only as a hash.
+ */
 @Document(collection = "users")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserDocument {
-
-    @Id
-    private UUID id;
-    private String email;
-    private String passwordHash;
-    private Role role;
-    private Instant createdAt;
+public record UserDocument(
+        @Id UUID id,
+        String email,
+        String passwordHash,
+        Role role,
+        Instant createdAt) {
 }
