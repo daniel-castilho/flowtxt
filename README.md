@@ -143,10 +143,9 @@ Interactive docs (Swagger UI): http://localhost:8080/swagger-ui.html.
 | `/messages` | `POST` | JWT | Send an SMS to a contact. |
 | `/webhook/twilio/status` | `POST` | see debt¹ | Receives Twilio delivery-status callbacks and updates message status. |
 
-> ¹ Implemented but currently caught by the catch-all `anyRequest().authenticated()` rule:
-> Twilio does not send a bearer token, so callbacks would be rejected until an explicit
-> authorization rule with Twilio request-signature validation lands (tracked in AGENTS.md
-> "Known technical debt").
+> ¹ Public at the HTTP-security layer and protected by Twilio request-signature validation
+> (`X-Twilio-Signature`, HMAC-SHA1 with the account auth token); invalid or unsigned requests
+> are rejected with 403. Behind a proxy, the app must see the same public URL Twilio dialed.
 
 ## Testing
 
@@ -188,8 +187,6 @@ adapters, the cache and the end-to-end security flow. Full guidance:
 
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
-- Explicit authorization rule + Twilio request-signature validation for
-  `/webhook/twilio/**` (currently behind the JWT catch-all — callbacks would 401).
 - Rate limiting on `/auth/login` (Redis-backed).
 - TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
 - `PhoneNumber` full E.164 validation in the domain value object.

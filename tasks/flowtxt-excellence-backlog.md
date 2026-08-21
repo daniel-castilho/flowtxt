@@ -5,7 +5,7 @@ Candidate backlog, ordered by value/risk. Status: **open** unless noted.
 | # | Item | Why | Status |
 | - | ---- | --- | ------ |
 | 1a | Twilio delivery-status webhook endpoint | Close the message lifecycle | **done** (2026-08-21): controller + `UpdateMessageStatusUseCase` + Mongo update shipped |
-| 1b | Explicit authorization rule + Twilio request-signature validation for `/webhook/twilio/**` (currently behind the JWT catch-all → callbacks would 401) | Make the webhook actually usable and tamper-proof | open |
+| 1b | Explicit authorization rule + Twilio request-signature validation for `/webhook/twilio/**` | Make the webhook actually usable and tamper-proof | **done** (2026-08-21): permitAll + fail-closed signature filter |
 | 2 | Rate limiting on `/auth/login` (Redis-backed fixed window) | Brute-force protection | open |
 | 3 | `PhoneNumber` full E.164 validation in the domain value object | Domain integrity | open |
 | 4 | Fail-fast config validation at boot (12-factor factor 3) | Production safety | open |

@@ -47,6 +47,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
         registry.add("jwt.secret",
                 () -> "integration-test-secret-that-is-long-enough-for-hs256!!");
+        registry.add("twilio.auth-token",
+                () -> "integration-test-twilio-token");
     }
 
     @Autowired

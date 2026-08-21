@@ -92,10 +92,6 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 
 ## Known technical debt (resolve later; flag, don't silently fix)
 
-- `/webhook/twilio/**` has no explicit authorization rule in `SecurityConfig`: it currently falls
-  under `anyRequest().authenticated()`, so Twilio callbacks (which send no bearer token) would
-  be rejected with 401. Needs an explicit rule plus Twilio request-signature validation
-  (`X-Twilio-Signature`) before production use.
 - `CacheService.put` / `RedisCacheAdapter` set no TTL, violating coding-standards §6 ("always
   set a TTL"); keys can live forever.
 - `SendMessageUseCaseImpl` persists twice by design (PENDING audit trail, then SENT/FAILED);
@@ -115,6 +111,10 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > direct-goal quality gates; Lombok fully removed — documents and PhoneNumber are records,
 > dependency dropped from all POMs; Redis Testcontainers properties moved to the Boot-3
 > spring.data.redis.* prefix (ITs were silently hitting localhost:6379). See CHANGELOG.
+
+> Resolved 2026-08-21 (later): `/webhook/twilio/**` got its explicit SecurityConfig rule plus
+> X-Twilio-Signature validation (fail-closed filter); the route no longer depends on the JWT
+> catch-all. Caveat: behind a proxy the app must see the public URL Twilio dialed.
 
 ## Notes
 

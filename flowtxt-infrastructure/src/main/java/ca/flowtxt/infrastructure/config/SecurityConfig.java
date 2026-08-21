@@ -1,6 +1,8 @@
 package ca.flowtxt.infrastructure.config;
 
 import ca.flowtxt.infrastructure.security.JwtAuthenticationFilter;
+import ca.flowtxt.infrastructure.security.TwilioSignatureValidationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -24,7 +26,16 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
+    public TwilioSignatureValidationFilter twilioSignatureValidationFilter(
+            @Value("${twilio.auth-token:}") String authToken) {
+        return new TwilioSignatureValidationFilter(authToken);
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            TwilioSignatureValidationFilter twilioSignatureValidationFilter)
             throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -32,6 +43,9 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        // Twilio callbacks carry no bearer token; authenticity is
+                        // enforced by the signature filter below instead.
+                        .requestMatchers("/webhook/twilio/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/api-docs/**").permitAll()
@@ -41,6 +55,10 @@ public class SecurityConfig {
                 // default 403), matching REST semantics and the IT contract.
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                // Both custom filters anchor on a BUILT-IN filter: Security 7
+                // rejects custom-filter anchors ("does not have a registered
+                // order"). Registration order keeps Twilio ahead of JWT.
+                .addFilterBefore(twilioSignatureValidationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

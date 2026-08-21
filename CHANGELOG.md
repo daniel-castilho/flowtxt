@@ -7,6 +7,12 @@ All notable changes to this project are documented in this file. The format is b
 ## [Unreleased]
 
 ### Added
+- **Twilio request-signature validation on the webhook**: `/webhook/twilio/**` now has its
+  explicit `permitAll` SecurityConfig rule and is protected by a fail-closed
+  `TwilioSignatureValidationFilter` (HMAC-SHA1 over the full URL + sorted params, constant-time
+  comparison, 403 on missing/invalid signatures or unconfigured token). The webhook is finally
+  usable by real Twilio callbacks, which carry no bearer token. Behind a proxy the app must see
+  the same public URL Twilio dialed. Covered by unit tests and end-to-end ITs.
 - **Rich immutable domain model**: `Contact`, `Message` and `User` rewritten from Lombok
   `@Data` data bags into `final` immutable classes with intent-revealing factories
   (`Contact.create`, `User.register`, `Message.pending`) and behaviour living in the entities;
