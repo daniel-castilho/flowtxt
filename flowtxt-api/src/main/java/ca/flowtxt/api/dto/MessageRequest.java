@@ -1,7 +1,6 @@
 package ca.flowtxt.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
 public record MessageRequest(
 
