@@ -7,12 +7,10 @@ import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.Message;
 import ca.flowtxt.domain.model.MessageStatus;
 import ca.flowtxt.domain.model.PhoneNumber;
-import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,12 +29,7 @@ class MongoRepositoriesIT extends AbstractIntegrationTest {
 
     @Test
     void persistsAndFindsAContactByPhoneNumber() {
-        Contact contact = Contact.builder()
-                .id(UUID.randomUUID())
-                .name("Maria Silva")
-                .phoneNumber(new PhoneNumber("+5511999999999"))
-                .build();
-
+        Contact contact = Contact.create("Maria Silva", new PhoneNumber("+5511999999999"));
         contactRepository.save(contact);
 
         assertTrue(contactRepository.findByPhoneNumber("+5511999999999").isPresent());
@@ -46,43 +39,28 @@ class MongoRepositoriesIT extends AbstractIntegrationTest {
 
     @Test
     void persistsAndFindsAUserByEmail() {
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .email("it-user@example.com")
-                .passwordHash("$2a$10$hash")
-                .role(Role.USER)
-                .createdAt(Instant.now())
-                .build();
-
-        userRepository.save(user);
+        userRepository.save(User.register("it-user@example.com", "$2a$10$hash"));
 
         assertTrue(userRepository.findByEmail("it-user@example.com").isPresent());
-        assertEquals(Role.USER,
+        assertEquals(ca.flowtxt.domain.model.Role.USER,
                 userRepository.findByEmail("it-user@example.com").get().getRole());
     }
 
     @Test
-    void persistsAMessageAndUpdatesItsStatusBySid() {
-        Contact contact = Contact.builder()
-                .id(UUID.randomUUID())
-                .name("João Souza")
-                .phoneNumber(new PhoneNumber("+5511888888888"))
-                .build();
+    void persistsAMessageAndFindsItBySidAfterItsLifecycleAdvances() {
+        Contact contact = Contact.create("John Souza", new PhoneNumber("+5511888888888"));
         contactRepository.save(contact);
 
-        Message message = Message.builder()
-                .id(UUID.randomUUID())
-                .contact(contact)
-                .content("Olá FlowTXT")
-                .status(MessageStatus.PENDING)
-                .timestamp(Instant.now())
-                .sid("SM-IT-123")
-                .build();
+        Message message = Message.pending(contact.getId(), "Hello FlowTXT");
         messageRepository.save(message);
+        messageRepository.save(message.markSent("SM-IT-123"));
 
-        messageRepository.updateStatusBySid("SM-IT-123", MessageStatus.SENT);
-
-        Message reloaded = messageRepository.findById(message.getId()).orElseThrow();
+        Message reloaded = messageRepository.findBySid("SM-IT-123").orElseThrow();
         assertEquals(MessageStatus.SENT, reloaded.getStatus());
+        assertEquals("SM-IT-123", reloaded.getSid());
+
+        messageRepository.save(reloaded.applyProviderStatus(MessageStatus.DELIVERED, "SM-IT-123"));
+        assertEquals(MessageStatus.DELIVERED,
+                messageRepository.findBySid("SM-IT-123").orElseThrow().getStatus());
     }
 }
