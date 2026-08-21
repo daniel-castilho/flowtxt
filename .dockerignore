@@ -1,0 +1,28 @@
+# Version control and CI internals
+.git
+.github
+.gitignore
+
+# Build output and caches
+target/
+*.iml
+.idea/
+.vscode/
+
+# Local runtime artefacts
+docker/
+
+# Secrets and environment files — never copied into an image layer
+*.env
+.env
+.env.*
+!*.env.example
+
+# Documentation (not needed at runtime)
+docs/
+tasks/
+README.md
+CHANGELOG.md
+AGENTS.md
+LICENSE
+dependency-check-suppressions.xml

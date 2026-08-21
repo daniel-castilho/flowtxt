@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!--
+      Record an advisory here ONLY when it is a confirmed false positive or
+      the vulnerable code path is provably unreachable in this project, and
+      note the reason + intended removal date. Do not seed this file with
+      entries just to keep the CI green.
+    -->
+</suppressions>

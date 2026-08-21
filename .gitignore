@@ -45,3 +45,6 @@ twilio.env
 *.env.*
 !.env.example.env
 .env
+
+# local backup artifacts
+*.bak.*

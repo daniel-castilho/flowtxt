@@ -47,8 +47,69 @@
                         <target>${java.version}</target>
                     </configuration>
                 </plugin>
+                <!-- JaCoCo coverage (report on verify; check in CI) -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.9</version>
+                    <configuration>
+                        <rules>
+                            <rule>
+                                <element>BUNDLE</element>
+                                <limits>
+                                    <limit>
+                                        <counter>LINE</counter>
+                                        <value>COVEREDRATIO</value>
+                                        <minimum>0.10</minimum>
+                                    </limit>
+                                </limits>
+                            </rule>
+                        </rules>
+                    </configuration>
+                </plugin>
+                <!-- SpotBugs static analysis -->
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.9.3.0</version>
+                    <configuration>
+                        <failOnError>true</failOnError>
+                    </configuration>
+                </plugin>
+                <!-- OWASP Dependency Check -->
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>12.1.9</version>
+                    <configuration>
+                        <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                        <suppressionFiles>
+                            <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- JaCoCo: attach the agent during tests and write the report on verify -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
-
 </project>

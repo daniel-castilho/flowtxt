@@ -1,10 +1,6 @@
 spring:
   application:
     name: flowtxt-api
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
   config:
     import: optional:file:.env
   profiles:
@@ -12,7 +8,7 @@ spring:
 
   data:
     mongodb:
-      # Conexão com MongoDB do docker-compose
+      # Local MongoDB from docker-compose
       uri: mongodb://root:rootpassword@localhost:27017/flowtxt?authSource=admin
   redis:
     host: localhost
@@ -24,6 +20,12 @@ spring:
 
 server:
   port: 8080
+
+# JWT — the secret is a DEV-ONLY placeholder. Production MUST override it via
+# the JWT_SECRET environment variable (e.g. `openssl rand -base64 48`).
+jwt:
+  secret: ${JWT_SECRET:change-me-dev-only-please-use-a-long-random-secret}
+  expiration-ms: ${JWT_EXPIRATION_MS:3600000}
 
 twilio:
   account-sid: ${TWILIO_ACCOUNT_SID}
@@ -43,3 +45,14 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true

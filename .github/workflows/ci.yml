@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write   # SARIF upload from Trivy
+  packages: write          # container registry push (when enabled)
+
+jobs:
+  build:
+    name: Build & Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Unit tests
+        run: ./mvnw test
+
+      - name: JaCoCo coverage check
+        if: success()
+        run: ./mvnw jacoco:check
+
+      - name: SpotBugs static analysis
+        if: success()
+        run: ./mvnw spotbugs:check
+
+      - name: OWASP Dependency Check
+        if: success()
+        run: ./mvnw dependency-check:check -DfailBuildOnAnyVulnerability=false
+
+      - name: Integration tests (Docker / Testcontainers)
+        if: success()
+        run: ./mvnw test -Dtest='*IT' -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Production build
+        if: success()
+        run: ./mvnw clean package
+
+      - name: Upload production jar
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flowtxt-api-jar
+          path: flowtxt-api/target/flowtxt-api-*.jar
+
+  # Build the production image and verify its supply-chain hygiene.
+  image:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          IMAGE="flowtxt-api:${{ github.sha }}"
+          docker build -t "$IMAGE" .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker inspect --format='{{.Id}}' "$IMAGE" > image-digest.txt
+          cat image-digest.txt
+
+      - name: Non-root check (must fail on UID 0)
+        run: |
+          out="$(docker run --rm --entrypoint id "$IMAGE")"
+          echo "$out"
+          if echo "$out" | grep -q 'uid=0('; then
+            echo "FATAL: image runs as root (UID 0)"
+            exit 1
+          fi
+          echo "OK: image runs as non-root ($out)"
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Generate SBOM
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          format: cyclonedx
+          output: sbom.cdx.json
+
+      - name: Upload SBOM + image digest
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sbom
+          path: |
+            sbom.cdx.json
+            image-digest.txt
