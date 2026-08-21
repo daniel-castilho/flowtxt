@@ -96,9 +96,6 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
   under `anyRequest().authenticated()`, so Twilio callbacks (which send no bearer token) would
   be rejected with 401. Needs an explicit rule plus Twilio request-signature validation
   (`X-Twilio-Signature`) before production use.
-- Persistence documents (`ContactDocument`, `MessageDocument`, `UserDocument`) still use Lombok
-  `@Data`; domain models are already rich immutable classes — Phase C will convert documents to
-  records and drop the dependency.
 - `CacheService.put` / `RedisCacheAdapter` set no TTL, violating coding-standards §6 ("always
   set a TTL"); keys can live forever.
 - `SendMessageUseCaseImpl` persists twice by design (PENDING audit trail, then SENT/FAILED);
@@ -114,7 +111,9 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test
 > container lifecycle fixed (singleton containers); missing-token responses corrected from 403
 > to 401; JaCoCo minimum raised 0.10 → 0.40; CI now installs reactor artifacts before the
-> direct-goal quality gates. See CHANGELOG.
+> direct-goal quality gates; Lombok fully removed — documents and PhoneNumber are records,
+> dependency dropped from all POMs; Redis Testcontainers properties moved to the Boot-3
+> spring.data.redis.* prefix (ITs were silently hitting localhost:6379). See CHANGELOG.
 
 ## Notes
 

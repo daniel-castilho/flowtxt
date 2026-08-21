@@ -41,8 +41,9 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", MONGO::getReplicaSetUrl);
-        registry.add("spring.redis.host", REDIS::getHost);
-        registry.add("spring.redis.port", () -> REDIS.getMappedPort(6379));
+        // Boot 3 prefix (spring.redis.* no longer exists)
+        registry.add("spring.data.redis.host", REDIS::getHost);
+        registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
         registry.add("jwt.secret",
                 () -> "integration-test-secret-that-is-long-enough-for-hs256!!");
     }

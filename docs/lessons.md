@@ -60,3 +60,17 @@ are **skipped** (not failed), and in CI (which has Docker) they run for real.
 
 **Rule:** annotate integration base classes with
 `@Testcontainers(disabledWithoutDocker = true)` so the suite is CI-strict but developer-friendly.
+
+---
+
+## A host service can mask wrong test configuration — hermeticity is proven only in CI (2026-08-21)
+
+The Redis integration test passed for weeks on dev machines while connecting to
+`localhost:6379` — an unrelated local Redis container from another project answered every call.
+The dynamic Testcontainers properties were registered under the pre-Spring-Boot-3
+`spring.redis.*` prefix, which Boot 3 ignores, so the mapped container port was never applied.
+CI's hermetic runner had no such service and went red on day one of actually running ITs.
+
+**Rule:** after changing connection configuration, verify which address the client ACTUALLY
+dials (log it once) instead of trusting a green local run; treat any pass that could be served
+by an unrelated host service as unproven.

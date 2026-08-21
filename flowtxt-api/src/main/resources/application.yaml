@@ -10,9 +10,10 @@ spring:
     mongodb:
       # Local MongoDB from docker-compose
       uri: mongodb://root:rootpassword@localhost:27017/flowtxt?authSource=admin
-  redis:
-    host: localhost
-    port: 6379
+    # Spring Boot 3 moved Redis properties under spring.data.redis
+    redis:
+      host: localhost
+      port: 6379
 
   jackson:
     serialization:

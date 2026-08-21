@@ -52,6 +52,11 @@ All notable changes to this project are documented in this file. The format is b
   `tasks/` backlog + AI prompt.
 
 ### Changed
+- **Lombok removed from the entire project** (Phase C): persistence documents are records
+  (Spring Data Mongo maps them through their canonical constructors), `PhoneNumber` is a
+  hand-written record (`value()` replaces `getValue()`), and `@RequiredArgsConstructor` /
+  `@Slf4j` gave way to explicit constructors and SLF4J loggers. The dependency and its
+  annotation-processor paths are gone from every module POM.
 - **Quality gates restored to green**: SpotBugs passes on all four modules (final classes,
   constructor-parameter injection in `SecurityConfig`, and a single documented exclusion in
   `spotbugs-exclude.xml` for the framework-injected `RedisTemplate` in `RedisCacheAdapter`).
@@ -78,6 +83,11 @@ All notable changes to this project are documented in this file. The format is b
   (`jwt.secret` dev placeholder, `jwt.expiration-ms`).
 
 ### Fixed
+- **Integration tests secretly required a Redis on localhost:6379**: dynamic Testcontainers
+  properties were registered under the pre-Spring-Boot-3 `spring.redis.*` prefix, which Boot 3
+  ignores — the mapped container port never applied and tests connected to `localhost:6379`
+  instead. Masked on dev machines by unrelated local Redis instances; caught red by CI once the
+  integration step finally ran. Prefix corrected to `spring.data.redis.*`.
 - **CI quality gates could not run**: `ci.yml` invoked `jacoco:check`, `spotbugs:check` and
   `dependency-check:check` as direct plugin goals, which resolve cross-module artifacts from the
   local repository rather than the reactor — a fresh runner had no installed modules, so the

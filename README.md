@@ -192,7 +192,6 @@ Deliberately not implemented yet (candidate backlog — see `tasks/`):
   `/webhook/twilio/**` (currently behind the JWT catch-all — callbacks would 401).
 - Rate limiting on `/auth/login` (Redis-backed).
 - TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
-- Purge Lombok from the persistence documents (records) and remove the dependency (Phase C).
 - `PhoneNumber` full E.164 validation in the domain value object.
 - Fail-fast configuration validation at boot (12-factor factor 3).
 - Raise the JaCoCo coverage target further (0.40 → 0.50+) as the suite grows.
