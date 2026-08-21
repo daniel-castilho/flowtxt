@@ -6,6 +6,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+- **Persistence migrated from MongoDB to PostgreSQL 16** (ADR-0002): `spring-data-jpa`
+  entities replace Mongo documents, adapters renamed `Mongo*Adapter` → `Jpa*Adapter`,
+  `docker-compose` runs `postgres:16`, and the schema is owned by **Flyway**
+  (`V1__init.sql` with UNIQUE/FK/CHECK constraints; `ddl-auto: validate`). `MessageEntity`
+  gains `@Version` optimistic locking so concurrent Twilio status callbacks cannot
+  overwrite each other. Integration tests now use `PostgreSQLContainer` + the same Flyway
+  schema. Config is Twelve-Factor (`DATABASE_URL`/`DB_USERNAME`/`DB_PASSWORD`).
+
 ### Added
 - **Twilio request-signature validation on the webhook**: `/webhook/twilio/**` now has its
   explicit `permitAll` SecurityConfig rule and is protected by a fail-closed

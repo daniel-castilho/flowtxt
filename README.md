@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
@@ -11,7 +11,7 @@
 FlowTXT is an **SMS delivery backend** built with **Java 21**, **Spring Boot 3.5** and a strict
 **Clean Architecture** (multi-module: domain / application / infrastructure / api). It manages
 contacts, sends SMS through **Twilio** (with a fake adapter for dev/test), tracks delivery
-status in **MongoDB**, uses **Redis** for caching, and secures every endpoint with **JWT**
+status in **PostgreSQL** (schema owned by Flyway), uses **Redis** for caching, and secures every endpoint with **JWT**
 authentication.
 
 **Project docs:** [AGENTS.md](AGENTS.md) (rules for solo/AI-assisted development) ·
@@ -40,13 +40,13 @@ authentication.
 | :--- | :--- |
 | **Language & Runtime** | Java 21 (Temurin), Spring Boot 4.1 (Tomcat 11, virtual threads) |
 | **Build** | Maven 3.9 (with `./mvnw` wrapper), multi-module reactor |
-| **Persistence** | MongoDB 7 (Spring Data) |
+| **Persistence** | PostgreSQL 16 (Spring Data JPA + Flyway) |
 | **Cache** | Redis 7 (Spring Data Redis) |
 | **SMS** | Twilio SDK 9 (`TwilioSmsAdapter` in `prod`, `FakeSmsAdapter` in `dev`/`test`) |
 | **Auth** | Spring Security 7 + JJWT 0.12 (stateless bearer tokens) |
 | **API docs** | springdoc-openapi (Swagger UI) |
 | **CI / Deploy** | GitHub Actions (unit tests → quality gates → `*IT` → image with Trivy + SBOM) |
-| **Testing** | JUnit 5, Mockito, Testcontainers (Mongo + Redis) |
+| **Testing** | JUnit 5, Mockito, Testcontainers (PostgreSQL + Redis) |
 
 ## Architecture
 
@@ -57,7 +57,7 @@ flowtxt-domain/         Entities, value objects & outbound port interfaces (Cont
 │                       User, PhoneNumber, MessageStatus, Role, PasswordHasher) — zero framework
 flowtxt-application/    Use-case orchestration (ports in/out) — pure Java
 │                       RegisterContact, SendMessage, UpdateMessageStatus, RegisterUser, AuthenticateUser
-flowtxt-infrastructure/ Adapters: Mongo repositories + mappers, Redis cache, Twilio/fake SMS,
+flowtxt-infrastructure/ Adapters: JPA repositories + mappers, Redis cache, Twilio/fake SMS,
 │                       JWT (service/filter/UserDetails/hasher), SecurityConfig, UseCaseConfig
 flowtxt-api/            Spring Boot app + thin REST controllers + DTOs + GlobalExceptionHandler
 ```
@@ -70,14 +70,14 @@ external concern is behind a port implemented by an adapter; controllers only ca
 
 - JDK 21
 - Maven 3.9+ (or use the bundled `./mvnw`)
-- Docker and Docker Compose (for Mongo + Redis, and for the integration tests)
+- Docker and Docker Compose (for PostgreSQL + Redis, and for the integration tests)
 
 ## Getting Started
 
 ### 1. Start the external services
 
 ```sh
-docker compose -f docker/docker-compose.yaml up -d   # MongoDB + Redis
+docker compose -f docker/docker-compose.yaml up -d   # PostgreSQL + Redis
 ```
 
 ### 2. Configure environment
@@ -150,7 +150,7 @@ Interactive docs (Swagger UI): http://localhost:8080/swagger-ui.html.
 ## Testing
 
 Pyramid of **60 unit tests** (domain → application → infrastructure → API slice) plus
-**6 integration tests** (`*IT`, Testcontainers with real MongoDB + Redis) covering repository
+**6 integration tests** (`*IT`, Testcontainers with real PostgreSQL + Redis) covering repository
 adapters, the cache and the end-to-end security flow. Full guidance:
 [docs/testing-playbook.md](docs/testing-playbook.md).
 
@@ -168,11 +168,11 @@ adapters, the cache and the end-to-end security flow. Full guidance:
 ## Current State
 
 - JWT auth (register/login + protected routes; missing tokens get a proper 401), user
-  persistence in Mongo.
+  persistence in PostgreSQL.
 - **Rich immutable domain model**: entities with behaviour (`Message` guards its forward-only
   status lifecycle; invalid transitions map to HTTP 409), factories instead of builders,
   equality by identity. No setters anywhere in the domain.
-- Contact + message flow with Mongo persistence and Twilio/fake SMS adapters; provider
+- Contact + message flow with PostgreSQL persistence and Twilio/fake SMS adapters; provider
   failures now transition the message to `FAILED`.
 - Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
   `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route authorization for

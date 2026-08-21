@@ -2,17 +2,21 @@ package ca.flowtxt.infrastructure.persistence.mapper;
 
 import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.PhoneNumber;
-import ca.flowtxt.infrastructure.persistence.document.ContactDocument;
+import ca.flowtxt.infrastructure.persistence.entity.ContactEntity;
 import org.mapstruct.Mapper;
 
+/**
+ * Maps between the immutable domain {@link Contact} and the JPA
+ * {@link ContactEntity}. The domain stays free of persistence annotations.
+ */
 @Mapper(componentModel = "spring")
 public interface ContactMapper {
 
-    // Domain → Document
-    ContactDocument toDocument(Contact contact);
+    // Domain → Entity
+    ContactEntity toEntity(Contact contact);
 
-    // Document → Domain
-    Contact toContact(ContactDocument document);
+    // Entity → Domain
+    Contact toDomain(ContactEntity entity);
 
     // PhoneNumber → String
     default String map(PhoneNumber phoneNumber) {
@@ -24,4 +28,3 @@ public interface ContactMapper {
         return phoneNumber != null ? new PhoneNumber(phoneNumber) : null;
     }
 }
-

@@ -1,8 +1,8 @@
 # Testing Playbook
 
 **Role:** Write and interpret tests for this Java 21 multi-module Clean Architecture service
-(Spring Boot 3.5, MongoDB, Redis, Twilio).
-**Stack constraints:** JUnit 5 + Mockito for unit tests; Testcontainers (MongoDB, Redis) for
+(Spring Boot 3.5, PostgreSQL, Redis, Twilio).
+**Stack constraints:** JUnit 5 + Mockito for unit tests; Testcontainers (PostgreSQL, Redis) for
 integration tests. No other test deps without human approval.
 
 Sources: `AGENTS.md` · `docs/coding-standards.md` · `docs/lessons.md` · colocated `*Test.java` /
@@ -23,13 +23,13 @@ Sources: `AGENTS.md` · `docs/coding-standards.md` · `docs/lessons.md` · coloc
    `FakeSmsAdapterTest`).
 4. **API unit (slice)** — controllers via `@WebMvcTest` with mocked use cases + real
    `SecurityConfig` (`AuthControllerTest`), and `GlobalExceptionHandlerTest`.
-5. **Integration (`*IT`, Testcontainers)** — the full application against real MongoDB + Redis
-   containers: repository adapters (`MongoRepositoriesIT`), the cache adapter
+5. **Integration (`*IT`, Testcontainers)** — the full application against real PostgreSQL + Redis
+   containers: repository adapters (`JpaRepositoriesIT`), the cache adapter
    (`RedisCacheAdapterIT`) and the end-to-end security flow (`SecurityFlowIT`:
    register → login → protected endpoint with/without token). Skipped automatically when Docker
    is unavailable.
 
-Never point tests at a shared local Mongo/Redis — always containers (or mocks).
+Never point tests at a shared local PostgreSQL/Redis — always containers (or mocks).
 
 ---
 
@@ -55,7 +55,7 @@ Never point tests at a shared local Mongo/Redis — always containers (or mocks)
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 @AutoConfigureMockMvc
-public abstract class AbstractIntegrationTest { /* Mongo + Redis containers + @DynamicPropertySource */ }
+public abstract class AbstractIntegrationTest { /* PostgreSQL + Redis containers + @DynamicPropertySource */ }
 ```
 
 `disabledWithoutDocker = true` means the suite is skipped (not failed) on machines without
@@ -96,7 +96,7 @@ Docker, and runs in CI where Docker is present.
 | API unit | `api/controller/AuthControllerTest` | register/login (201/200/400) |
 | | `api/exception/GlobalExceptionHandlerTest` | 400/400/500 mapping |
 | API IT | `api/AbstractIntegrationTest` | Base (containers) |
-| | `api/MongoRepositoriesIT` | Contact/User/Message persistence |
+| | `api/JpaRepositoriesIT` | Contact/User/Message persistence |
 | | `api/RedisCacheAdapterIT` | Real Redis put/get/remove |
 | | `api/SecurityFlowIT` | E2E register→login→protected |
 
@@ -116,7 +116,7 @@ parallel suite.
 | **Users** | Create → persisted → found by email |
 | **Cache** | put → get → remove (real Redis) |
 | **Boundaries** | `domain/` + `application/` free of Spring/Twilio/JJWT imports (grep in AGENTS.md) |
-| **Stack** | Java 21, Spring Boot 4.1.x, Mongo 7, Redis 7 — no version drift |
+| **Stack** | Java 21, Spring Boot 4.1.x, PostgreSQL 16, Redis 7 — no version drift |
 
 ---
 
@@ -144,7 +144,7 @@ job (non-root check, Trivy scan, SBOM). Prefer the fast unit loop locally.
 | **Security** | Unexpected 401/403 in controller test | Check `SecurityConfig` rules and `@Import` in the test |
 | **Container** | Testcontainers cannot start | Confirm Docker is running; `*IT` are skipped otherwise |
 | **MapStruct** | Mapper impl not generated | `./mvnw clean compile` (annotation processing) |
-| **Flaky / env** | Port, Redis, Mongo | Re-run; fix the cause — don't skip tests |
+| **Flaky / env** | Port, Redis, PostgreSQL | Re-run; fix the cause — don't skip tests |
 
 **Priority when many fail:** compile/annotation → domain → application → infrastructure → API →
 integration.
@@ -155,7 +155,7 @@ integration.
 
 - Skip, delete, or `@Disabled` tests to green the build
 - Add new test frameworks without human approval
-- Point tests at a shared local Mongo/Redis instance
+- Point tests at a shared local PostgreSQL/Redis instance
 - Assert on plaintext passwords or raw tokens in logs
 - Weaken an existing test to make a change pass
 - Put business rules in controller tests "because the controller failed"

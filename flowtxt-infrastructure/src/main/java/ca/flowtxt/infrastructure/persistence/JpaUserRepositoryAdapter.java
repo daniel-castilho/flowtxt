@@ -7,13 +7,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * PostgreSQL/JPA adapter for {@link UserRepository}.
+ */
 @Repository
-public class MongoUserRepositoryAdapter implements UserRepository {
+public class JpaUserRepositoryAdapter implements UserRepository {
 
     private final SpringDataUserRepository repository;
     private final UserMapper mapper;
 
-    public MongoUserRepositoryAdapter(
+    public JpaUserRepositoryAdapter(
             SpringDataUserRepository repository,
             UserMapper mapper) {
         this.repository = repository;
@@ -27,6 +30,6 @@ public class MongoUserRepositoryAdapter implements UserRepository {
 
     @Override
     public void save(User user) {
-        repository.save(mapper.toDocument(user));
+        repository.save(mapper.toEntity(user));
     }
 }

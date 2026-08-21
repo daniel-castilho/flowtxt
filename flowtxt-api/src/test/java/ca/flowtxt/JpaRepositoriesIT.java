@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MongoRepositoriesIT extends AbstractIntegrationTest {
+class JpaRepositoriesIT extends AbstractIntegrationTest {
 
     @Autowired
     private ContactRepository contactRepository;

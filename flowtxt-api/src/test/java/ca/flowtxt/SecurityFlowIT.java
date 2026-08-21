@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * End-to-end security flow against real Mongo + Redis containers:
+ * End-to-end security flow against real PostgreSQL + Redis containers:
  * register -> login -> protected endpoint (with and without a token).
  */
 class SecurityFlowIT extends AbstractIntegrationTest {

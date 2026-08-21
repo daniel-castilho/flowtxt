@@ -7,13 +7,14 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 /**
  * Base class for integration tests: boots the full application against real
- * MongoDB and Redis containers. Skipped automatically when Docker is not
+ * PostgreSQL and Redis containers, with the schema applied by Flyway (the
+ * same migrations production runs). Skipped automatically when Docker is not
  * available (see @Testcontainers(disabledWithoutDocker = true)).
  *
  * <p>The containers are started once per JVM in a static initializer instead
@@ -27,22 +28,24 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
-    static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"));
 
     static final GenericContainer<?> REDIS =
             new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
                     .withExposedPorts(6379);
 
     static {
-        MONGO.start();
+        POSTGRES.start();
         REDIS.start();
     }
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        // Boot 4 renamed the Mongo connection namespace to spring.mongodb.*
-        registry.add("spring.mongodb.uri", MONGO::getReplicaSetUrl);
-        // Boot 3 prefix (spring.redis.* no longer exists)
+        // Flyway runs automatically on boot and applies V1__init.sql.
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.data.redis.host", REDIS::getHost);
         registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
         registry.add("jwt.secret",

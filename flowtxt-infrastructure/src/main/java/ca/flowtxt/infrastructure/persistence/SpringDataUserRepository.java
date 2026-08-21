@@ -1,12 +1,12 @@
 package ca.flowtxt.infrastructure.persistence;
 
-import ca.flowtxt.infrastructure.persistence.document.UserDocument;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import ca.flowtxt.infrastructure.persistence.entity.UserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SpringDataUserRepository extends MongoRepository<UserDocument, UUID> {
+public interface SpringDataUserRepository extends JpaRepository<UserEntity, UUID> {
 
-    Optional<UserDocument> findByEmail(String email);
+    Optional<UserEntity> findByEmail(String email);
 }

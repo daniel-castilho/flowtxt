@@ -1,18 +1,18 @@
 package ca.flowtxt.infrastructure.persistence.mapper;
 
 import ca.flowtxt.domain.model.Message;
-import ca.flowtxt.infrastructure.persistence.document.MessageDocument;
+import ca.flowtxt.infrastructure.persistence.entity.MessageEntity;
 import org.mapstruct.Mapper;
 
 /**
- * Field names align one-to-one between the immutable domain {@link Message}
- * (constructor mapping) and the mutable {@link MessageDocument} (setter
- * mapping), so no explicit @Mapping configuration is required.
+ * Maps between the immutable domain {@link Message} and the JPA
+ * {@link MessageEntity}. Field names align one-to-one (constructor mapping on
+ * the domain side, setter mapping on the entity side).
  */
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
 
-    MessageDocument toDocument(Message message);
+    MessageEntity toEntity(Message message);
 
-    Message toDomain(MessageDocument document);
+    Message toDomain(MessageEntity entity);
 }

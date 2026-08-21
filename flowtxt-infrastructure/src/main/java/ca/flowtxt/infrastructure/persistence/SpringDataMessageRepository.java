@@ -1,12 +1,12 @@
 package ca.flowtxt.infrastructure.persistence;
 
-import ca.flowtxt.infrastructure.persistence.document.MessageDocument;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import ca.flowtxt.infrastructure.persistence.entity.MessageEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SpringDataMessageRepository extends MongoRepository<MessageDocument, UUID> {
+public interface SpringDataMessageRepository extends JpaRepository<MessageEntity, UUID> {
 
-    Optional<MessageDocument> findBySid(String messageSid);
+    Optional<MessageEntity> findBySid(String messageSid);
 }

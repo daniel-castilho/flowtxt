@@ -2,7 +2,7 @@
 
 FlowTXT — an SMS delivery backend built with **Java 21 + Spring Boot 3.5** as a strict
 **Clean Architecture** (layered, multi-module) service. The business core (`flowtxt-domain` +
-`flowtxt-application`) is kept independent of `infrastructure` details: persistence (MongoDB),
+`flowtxt-application`) is kept independent of `infrastructure` details: persistence (PostgreSQL via Spring Data JPA + Flyway),
 cache (Redis), SMS delivery (Twilio / fake for dev) and the web layer (Spring Web controllers)
 are all behind ports.
 
@@ -24,7 +24,7 @@ relevant parts before starting any task.
    (use cases). `infrastructure` adapters and `api` controllers/DTOs are **thin** — no business
    rules, no repository calls from controllers. Controllers depend only on
    `application/port/in` interfaces.
-3. **Zero direct Mongo / Redis / Twilio / JWT usage outside `infrastructure/`.** Every operation
+3. **Zero direct PostgreSQL / Redis / Twilio / JWT usage outside `infrastructure/`.** Every operation
    goes through a domain/application port (`ContactRepository`, `MessageRepository`,
    `UserRepository`, `SmsService`, `CacheService`, `PasswordHasher`) implemented by an adapter.
 4. Passwords are hashed with **BCrypt** via the domain `PasswordHasher` port (adapter:
@@ -62,11 +62,11 @@ relevant parts before starting any task.
 | SpotBugs static analysis | `./mvnw spotbugs:check` |
 | OWASP Dependency Check | `./mvnw dependency-check:check -DfailBuildOnAnyVulnerability=false` |
 | Production build | `./mvnw clean package` |
-| Start external services (Mongo + Redis) | `docker compose -f docker/docker-compose.yaml up -d` |
+| Start external services (PostgreSQL + Redis) | `docker compose -f docker/docker-compose.yaml up -d` |
 | Interactive API docs | http://localhost:8080/swagger-ui.html |
 
 > Prefer the fast unit-test loop (`./mvnw test`); it needs **no Docker**. The `*IT` classes
-> (Testcontainers: Mongo/Redis adapters, security flow) are skipped automatically when Docker
+> (Testcontainers: PostgreSQL/Redis adapters, security flow) are skipped automatically when Docker
 > is unavailable and run explicitly with the command above (or in CI).
 
 ## Architecture
@@ -81,7 +81,7 @@ flowtxt-* modules (Clean Architecture, dependency rule points inward):
 │   │                        UpdateMessageStatus, RegisterUser, AuthenticateUser)
 │   └── port/out/           Repository/service ports (ContactRepository, MessageRepository,
 │                            UserRepository, SmsService, CacheService)
-├── flowtxt-infrastructure/ Adapters: Mongo repositories + mappers, Redis cache, Twilio/fake
+├── flowtxt-infrastructure/ Adapters: JPA repositories + mappers, Redis cache, Twilio/fake
 │                           SMS, JWT security (filter, UserDetails, hasher), SecurityConfig,
 │                           UseCaseConfig (composition root)
 └── flowtxt-api/            Spring Boot app + REST controllers + DTOs + GlobalExceptionHandler

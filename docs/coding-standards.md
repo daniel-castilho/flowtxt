@@ -19,7 +19,7 @@ Where this file conflicts with `AGENTS.md`, **`AGENTS.md` wins**.
 | Modules / packages | lowercase, `ca.flowtxt.<layer>` | `ca.flowtxt.application.usecase` |
 | Classes / types / interfaces | PascalCase | `SendMessageUseCaseImpl`, `ContactRepository` |
 | Use-case implementations | `<UseCase>Impl` | `RegisterUserUseCaseImpl` |
-| Adapters | `<Technology><Port>Adapter` | `MongoUserRepositoryAdapter`, `TwilioSmsAdapter` |
+| Adapters | `<Technology><Port>Adapter` | `JpaUserRepositoryAdapter`, `TwilioSmsAdapter` |
 | Ports | `<Concept><Kind>` (Repository/Service/UseCase/Hasher) | `SmsService`, `PasswordHasher` |
 | Methods / variables | camelCase | `sendMessage()`, `passwordHash` |
 | Constants / enums | UPPER_SNAKE_CASE | `MIN_PASSWORD_LENGTH`, `MessageStatus.SENT` |
@@ -27,7 +27,7 @@ Where this file conflicts with `AGENTS.md`, **`AGENTS.md` wins**.
 | Tests (integration) | `*IT.java` | `SecurityFlowIT` |
 | DTOs (records) | `<Noun>Request` / `<Noun>Response` | `RegisterUserRequest`, `AuthResponse` |
 
-Name for **what it is or does**, not the implementation: `ContactRepository`, not `MongoDao`.
+Name for **what it is or does**, not the implementation: `ContactRepository`, not `JpaContactDao`.
 
 ## 2. Package / folder structure (Clean Architecture, feature-agnostic)
 
@@ -42,7 +42,7 @@ flowtxt-application/src/main/java/ca/flowtxt/application/
 └── usecase/            Implementations (depend on ports only)
 
 flowtxt-infrastructure/src/main/java/ca/flowtxt/infrastructure/
-├── persistence/        Mongo repositories (Spring Data), documents, mappers
+├── persistence/        JPA repositories + entities (Spring Data JPA), mappers
 ├── cache/              Redis adapter
 ├── sms/                Twilio + fake adapters
 ├── security/           JWT service, filter, UserDetails, hasher
@@ -58,7 +58,7 @@ flowtxt-api/src/main/java/ca/flowtxt/api/
 
 | Layer | Framework / external imports |
 | --- | --- |
-| `domain/` | **None** — no Spring, Twilio, JJWT, MongoDB |
+| `domain/` | **None** — no Spring, Twilio, JJWT, JPA |
 | `application/` | **None** — pure Java + domain types |
 | `infrastructure/` | Full stack allowed (Spring Data, Redis, Twilio, JJWT) |
 | `api/` | Spring Web, validation, security test helpers |
@@ -90,11 +90,11 @@ flowtxt-api/src/main/java/ca/flowtxt/api/
 - Log levels: `error` — needs attention · `warn` — handled anomaly · `info` — lifecycle ·
   `debug` — diagnostics.
 
-## 6. Persistence (MongoDB) & cache (Redis)
+## 6. Persistence (PostgreSQL/JPA) & cache (Redis)
 
 - One Spring Data repository per aggregate; explicit mappers (MapStruct) between documents and
   domain models — domain models never leak persistence annotations.
-- Prefer explicit repository interfaces (ports) over exposing `MongoRepository` to the
+- Prefer explicit repository interfaces (ports) over exposing `JpaRepository` to the
   application layer.
 - Redis (`CacheService` port): always set a TTL when adding new cache entries; keys follow
   `flowtxt:<purpose>:<id>`; never store secrets.
@@ -107,7 +107,7 @@ flowtxt-api/src/main/java/ca/flowtxt/api/
 | Domain | JUnit 5 | Pure invariants, no mocks |
 | Application | JUnit 5 + Mockito | Mock **ports only**; happy + rejection paths |
 | Infrastructure unit | JUnit 5 + Mockito | Mappers, hasher, JWT service, cache adapter |
-| Integration | JUnit 5 + Testcontainers (`*IT`) | Mongo + Redis containers, real adapters, security flow |
+| Integration | JUnit 5 + Testcontainers (`*IT`) | PostgreSQL + Redis containers, real adapters, security flow |
 
 - Names: `method_condition_expectedResult` or descriptive `shouldXWhenY`.
 - Fast loop: `./mvnw test` (no Docker). Integration: `./mvnw test -Dtest='*IT' -Dsurefire.failIfNoSpecifiedTests=false`.

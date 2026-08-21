@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# smoke-test.sh — boots the API against local Mongo + Redis and exercises the
+# smoke-test.sh — boots the API against local PostgreSQL + Redis and exercises the
 # core flow: health -> register -> login -> protected contact creation.
 #
 # Usage: ./scripts/smoke-test.sh
@@ -9,7 +9,7 @@ set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 
-echo "==> Starting Mongo + Redis (docker compose)"
+echo "==> Starting PostgreSQL + Redis (docker compose)"
 docker compose -f docker/docker-compose.yaml up -d
 
 echo "==> Starting the API (background)"

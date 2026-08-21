@@ -1,11 +1,12 @@
 package ca.flowtxt.infrastructure.persistence;
 
-import ca.flowtxt.infrastructure.persistence.document.ContactDocument;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import ca.flowtxt.infrastructure.persistence.entity.ContactEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SpringDataContactRepository extends MongoRepository<ContactDocument, UUID> {
-    Optional<ContactDocument> findByPhoneNumber(final String phoneNumber);
+public interface SpringDataContactRepository extends JpaRepository<ContactEntity, UUID> {
+
+    Optional<ContactEntity> findByPhoneNumber(String phoneNumber);
 }
