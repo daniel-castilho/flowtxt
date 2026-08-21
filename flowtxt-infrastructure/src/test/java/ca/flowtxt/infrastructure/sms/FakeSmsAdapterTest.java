@@ -12,7 +12,7 @@ class FakeSmsAdapterTest {
     @Test
     void sendsAMessageAndReturnsAFakeSid() {
         String sid = adapter.sendMessage(
-                "+15005550000", "+5511999999999", "Olá FlowTXT");
+                "+15005550000", "+5511999999999", "Hello FlowTXT");
 
         assertNotNull(sid);
         assertTrue(sid.startsWith("FAKE-"));

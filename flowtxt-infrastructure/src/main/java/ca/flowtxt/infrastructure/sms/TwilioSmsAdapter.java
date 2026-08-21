@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
 @Slf4j
-public class TwilioSmsAdapter implements SmsService {
+public final class TwilioSmsAdapter implements SmsService {
 
     private final String accountSid;
     private final String authToken;
@@ -26,25 +26,25 @@ public class TwilioSmsAdapter implements SmsService {
                 ? "****" + authToken.substring(authToken.length() - 4)
                 : "****";
 
-        log.info("Inicializando Twilio com Account SID: {}", accountSid);
-        log.info("Auth Token (mascarado): {}", maskedAuthToken);
-        log.info("Número de origem configurado: {}", fromNumber);
+        log.info("Initializing Twilio with Account SID: {}", accountSid);
+        log.info("Auth Token (masked): {}", maskedAuthToken);
+        log.info("Configured origin number: {}", fromNumber);
 
         try {
             Twilio.init(accountSid, authToken);
-            log.info("Cliente Twilio inicializado com sucesso");
+            log.info("Twilio client initialized successfully");
         } catch (Exception e) {
-            log.error("Falha ao inicializar cliente Twilio: {}", e.getMessage(), e);
+            log.error("Failed to initialize Twilio client: {}", e.getMessage(), e);
             throw e;
         }
     }
 
     @Override
     public String sendMessage(final String fromPhoneNumber, final String toPhoneNumber, final String content) {
-        log.info("Enviando SMS - De: {}, Para: {}, Conteúdo: {}", fromPhoneNumber, toPhoneNumber, content);
+        log.info("Sending SMS - From: {}, To: {}, Content: {}", fromPhoneNumber, toPhoneNumber, content);
 
         try {
-            log.debug("Criando mensagem Twilio...");
+            log.debug("Creating Twilio message...");
             Message message = Message.creator(
                     new PhoneNumber(toPhoneNumber),
                     new PhoneNumber(fromPhoneNumber),
@@ -52,24 +52,25 @@ public class TwilioSmsAdapter implements SmsService {
             ).create();
 
             String sid = message.getSid();
-            log.info("SMS enviado com sucesso. SID da mensagem: {}", sid);
+            log.info("SMS sent successfully. Message SID: {}", sid);
             return sid;
 
         } catch (Exception e) {
-            log.error("Falha ao enviar SMS. Detalhes:", e);
-            log.error("Classe do erro: {}", e.getClass().getName());
-            log.error("Mensagem do erro: {}", e.getMessage());
+            log.error("Failed to send SMS. Details:", e);
+            log.error("Error class: {}", e.getClass().getName());
+            log.error("Error message: {}", e.getMessage());
 
             if (e.getCause() != null) {
-                log.error("Causa raiz: {}: {}", e.getCause().getClass().getName(), e.getCause().getMessage());
+                log.error("Root cause: {}: {}",
+                        e.getCause().getClass().getName(), e.getCause().getMessage());
             }
 
-            throw new RuntimeException("Falha ao enviar SMS: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to send SMS: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void receiveMessage(String payload) {
-        throw new UnsupportedOperationException("Webhook de recebimento ainda não implementado");
+        throw new UnsupportedOperationException("Inbound message webhook not implemented yet");
     }
 }

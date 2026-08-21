@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusions. Every entry must be as narrow as possible (class +
+  pattern) and carry a written justification; re-review each entry whenever
+  the underlying code changes.
+-->
+<FindBugsFilter>
+    <!--
+      RedisCacheAdapter stores the RedisTemplate injected by Spring. The
+      template is a framework-managed collaborator: defensive copying is
+      meaningless here and sharing the reference is the intended contract.
+    -->
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.cache.RedisCacheAdapter"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>

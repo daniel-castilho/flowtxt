@@ -18,7 +18,7 @@ import java.util.Date;
  * configuration (environment in production).
  */
 @Component
-public class JwtService {
+public final class JwtService {
 
     private final SecretKey key;
     private final long expirationMs;

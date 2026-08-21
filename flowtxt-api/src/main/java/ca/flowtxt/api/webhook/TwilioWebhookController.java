@@ -23,9 +23,9 @@ public class TwilioWebhookController {
             @RequestParam("MessageSid") String messageSid,
             @RequestParam("MessageStatus") String messageStatus) {
 
-        log.info("📩 Webhook recebido do Twilio: sid={}, status={}", messageSid, messageStatus);
+        log.info("Twilio status webhook received: sid={}, status={}", messageSid, messageStatus);
 
-        // Converte string do Twilio para nosso enum
+        // Map the Twilio status string onto the domain enum
         MessageStatus status = mapTwilioStatus(messageStatus);
 
         updateMessageStatusUseCase.updateStatus(messageSid, status);

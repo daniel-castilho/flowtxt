@@ -60,7 +60,7 @@
                                     <limit>
                                         <counter>LINE</counter>
                                         <value>COVEREDRATIO</value>
-                                        <minimum>0.10</minimum>
+                                        <minimum>0.40</minimum>
                                     </limit>
                                 </limits>
                             </rule>
@@ -74,6 +74,7 @@
                     <version>4.9.3.0</version>
                     <configuration>
                         <failOnError>true</failOnError>
+                        <excludeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-exclude.xml</excludeFilterFile>
                     </configuration>
                 </plugin>
                 <!-- OWASP Dependency Check -->
