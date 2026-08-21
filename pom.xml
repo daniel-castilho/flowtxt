@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spring.boot.version>3.5.7</spring.boot.version>
+        <spring.boot.version>4.1.0</spring.boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -30,6 +30,12 @@
                 <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- Pin over the Twilio SDK's transitive commons-io (CVE-2024-47554) -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.16.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

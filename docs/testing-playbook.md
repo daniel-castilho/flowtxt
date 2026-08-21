@@ -116,7 +116,7 @@ parallel suite.
 | **Users** | Create → persisted → found by email |
 | **Cache** | put → get → remove (real Redis) |
 | **Boundaries** | `domain/` + `application/` free of Spring/Twilio/JJWT imports (grep in AGENTS.md) |
-| **Stack** | Java 21, Spring Boot 3.5.x, Mongo 7, Redis 7 — no version drift |
+| **Stack** | Java 21, Spring Boot 4.1.x, Mongo 7, Redis 7 — no version drift |
 
 ---
 

@@ -52,6 +52,17 @@ All notable changes to this project are documented in this file. The format is b
   `tasks/` backlog + AI prompt.
 
 ### Changed
+- **Upgraded to Spring Boot 4.1** (from EOL 3.5.7): Spring Framework 7 / Security 7 /
+  Spring Data MongoDB 5, Tomcat 11 embedded server and Java 21 virtual threads enabled
+  (`spring.threads.virtual.enabled`). Migration notes: `spring-boot-starter-web` renamed to
+  `spring-boot-starter-webmvc`; `@MockBean` replaced by `@MockitoBean`; test annotations moved
+  (`@WebMvcTest`/`@AutoConfigureMockMvc`) with the new `spring-boot-starter-webmvc-test`;
+  Jackson 3 (`tools.jackson.*`) replaces Jackson 2; MongoDB connection properties renamed
+  `spring.data.mongodb.*` -> `spring.mongodb.*` (silent-failure rename) with an explicit
+  standard UUID representation; springdoc upgraded to 3.1.0; commons-io pinned at 2.16.1 over
+  the Twilio SDK's vulnerable transitive (CVE-2024-47554). Undertow was considered as an
+  embedded-server alternative but Boot 4 dropped its support (no Servlet 6.1 release);
+  Tomcat 11 + virtual threads covers that ground on supported lines.
 - **Lombok removed from the entire project** (Phase C): persistence documents are records
   (Spring Data Mongo maps them through their canonical constructors), `PhoneNumber` is a
   hand-written record (`value()` replaces `getValue()`), and `@RequiredArgsConstructor` /

@@ -1,16 +1,24 @@
 spring:
   application:
     name: flowtxt-api
+  # Java 21 virtual threads: cheap blocking-I/O concurrency without a
+  # different servlet container (the modern answer to why projects used to
+  # pick Undertow).
+  threads:
+    virtual:
+      enabled: true
   config:
     import: optional:file:.env
   profiles:
     active: dev
 
+  # Boot 4 moved MongoDB connection properties to spring.mongodb.*
+  mongodb:
+    uri: mongodb://root:rootpassword@localhost:27017/flowtxt?authSource=admin
+    representation:
+      uuid: standard
+  # Boot 3 renamed Redis properties under spring.data.redis
   data:
-    mongodb:
-      # Local MongoDB from docker-compose
-      uri: mongodb://root:rootpassword@localhost:27017/flowtxt?authSource=admin
-    # Spring Boot 3 moved Redis properties under spring.data.redis
     redis:
       host: localhost
       port: 6379

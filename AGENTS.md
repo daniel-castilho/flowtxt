@@ -105,6 +105,7 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 - `PhoneNumber` validation is minimal (E.164-ish regex lives in the DTO; a domain-level value
   object validation with full E.164 is a candidate improvement).
 - No rate limiting on `/auth/login` (a Redis-backed limiter is a candidate).
+- `jjwt-jackson` still pulls Jackson 2 transitively for token serialization while the app runs Jackson 3; swap modules when jjwt ships a Jackson 3-compatible one.
 
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable

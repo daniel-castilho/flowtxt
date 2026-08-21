@@ -1,7 +1,7 @@
 # FlowTXT
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
@@ -38,12 +38,12 @@ authentication.
 
 | Category | Technology |
 | :--- | :--- |
-| **Language & Runtime** | Java 21 (Temurin), Spring Boot 3.5.7 |
+| **Language & Runtime** | Java 21 (Temurin), Spring Boot 4.1 (Tomcat 11, virtual threads) |
 | **Build** | Maven 3.9 (with `./mvnw` wrapper), multi-module reactor |
 | **Persistence** | MongoDB 7 (Spring Data) |
 | **Cache** | Redis 7 (Spring Data Redis) |
 | **SMS** | Twilio SDK 9 (`TwilioSmsAdapter` in `prod`, `FakeSmsAdapter` in `dev`/`test`) |
-| **Auth** | Spring Security 6 + JJWT 0.12 (stateless bearer tokens) |
+| **Auth** | Spring Security 7 + JJWT 0.12 (stateless bearer tokens) |
 | **API docs** | springdoc-openapi (Swagger UI) |
 | **CI / Deploy** | GitHub Actions (unit tests → quality gates → `*IT` → image with Trivy + SBOM) |
 | **Testing** | JUnit 5, Mockito, Testcontainers (Mongo + Redis) |
