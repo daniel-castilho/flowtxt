@@ -13,7 +13,9 @@ echo "==> Starting PostgreSQL + Redis (docker compose)"
 docker compose -f docker/docker-compose.yaml up -d
 
 echo "==> Starting the API (background)"
-./mvnw spring-boot:run -pl flowtxt-api > /tmp/flowtxt-smoke.log 2>&1 &
+# -am: build upstream modules in-reactor, otherwise spring-boot:run resolves
+# stale flowtxt-* SNAPSHOTs from the local repository.
+./mvnw -q spring-boot:run -pl flowtxt-api -am > /tmp/flowtxt-smoke.log 2>&1 &
 APP_PID=$!
 trap 'kill $APP_PID 2>/dev/null || true; docker compose -f docker/docker-compose.yaml down' EXIT
 
@@ -34,7 +36,8 @@ REGISTER=$(curl -sf -X POST "$BASE_URL/auth/register" \
   || { echo "FATAL: register failed"; tail -50 /tmp/flowtxt-smoke.log; exit 1; })
 echo "    $REGISTER"
 
-TOKEN=$(echo "$REGISTER" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+# The API pretty-prints JSON (INDENT_OUTPUT), so tolerate spaces around ':'.
+TOKEN=$(echo "$REGISTER" | sed -n 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 [ -n "$TOKEN" ] || { echo "FATAL: no token in register response"; exit 1; }
 
 echo "==> Create a contact with the token"
