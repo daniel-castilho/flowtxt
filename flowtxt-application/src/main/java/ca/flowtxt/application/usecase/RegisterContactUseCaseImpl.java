@@ -15,6 +15,11 @@ public class RegisterContactUseCaseImpl implements RegisterContactUseCase {
 
     @Override
     public Contact execute(final String name, final String phoneNumber) {
+        contactRepository.findByPhoneNumber(phoneNumber).ifPresent(existing -> {
+            throw new IllegalStateException(
+                    "Contact with phone number " + phoneNumber + " already exists");
+        });
+
         var contact = Contact.create(name, new PhoneNumber(phoneNumber));
         contactRepository.save(contact);
         return contact;
