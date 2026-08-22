@@ -1,8 +1,10 @@
 package ca.flowtxt;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,4 +58,16 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected MockMvc mockMvc;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void resetDatabaseState() {
+        // The containers are singletons shared by every *IT class in this JVM:
+        // without a reset, fixed fixtures collide across classes (duplicate
+        // keys) depending on execution order. CASCADE covers messages ->
+        // contacts regardless of table order.
+        jdbcTemplate.execute("TRUNCATE TABLE messages, contacts, users CASCADE");
+    }
 }
