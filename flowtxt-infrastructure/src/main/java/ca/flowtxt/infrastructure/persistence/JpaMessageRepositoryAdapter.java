@@ -2,8 +2,10 @@ package ca.flowtxt.infrastructure.persistence;
 
 import ca.flowtxt.application.port.out.MessageRepository;
 import ca.flowtxt.domain.model.Message;
+import ca.flowtxt.infrastructure.persistence.entity.MessageEntity;
 import ca.flowtxt.infrastructure.persistence.mapper.MessageMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,9 +26,21 @@ public class JpaMessageRepositoryAdapter implements MessageRepository {
         this.mapper = mapper;
     }
 
+    /**
+     * Persists the aggregate with load-then-apply: an existing row is loaded
+     * as a managed entity and updated in place, so Hibernate's
+     * {@code @Version} bookkeeping survives every write. Remapping the
+     * immutable domain onto a fresh entity instead would reset the version to
+     * 0 and make any post-insert update fail with a false
+     * concurrent-modification conflict.
+     */
     @Override
+    @Transactional
     public void save(Message message) {
-        repository.save(mapper.toEntity(message));
+        MessageEntity entity = repository.findById(message.getId())
+                .orElseGet(() -> mapper.toEntity(message));
+        mapper.apply(message, entity);
+        repository.save(entity);
     }
 
     @Override

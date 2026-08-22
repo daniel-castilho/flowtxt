@@ -97,4 +97,28 @@ public class MessageEntity {
     public long getVersion() {
         return version;
     }
+
+    // Setters exist for the mapper's update-in-place path (load-then-apply);
+    // they cover business state only. {@code version} has deliberately no
+    // setter: optimistic-locking bookkeeping belongs to the JPA provider.
+
+    public void setContactId(UUID contactId) {
+        this.contactId = contactId;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setStatus(MessageStatus status) {
+        this.status = status;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
+    }
 }
