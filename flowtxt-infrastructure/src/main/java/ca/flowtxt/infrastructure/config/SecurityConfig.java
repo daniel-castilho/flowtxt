@@ -1,9 +1,9 @@
 package ca.flowtxt.infrastructure.config;
 
+import ca.flowtxt.infrastructure.config.properties.TwilioProperties;
 import ca.flowtxt.infrastructure.security.JwtAuthenticationFilter;
 import ca.flowtxt.infrastructure.security.TwilioSignatureValidationFilter;
 import ca.flowtxt.infrastructure.security.filter.RateLimitFilter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -28,8 +28,8 @@ public class SecurityConfig {
 
     @Bean
     public TwilioSignatureValidationFilter twilioSignatureValidationFilter(
-            @Value("${twilio.auth-token:}") String authToken) {
-        return new TwilioSignatureValidationFilter(authToken);
+            TwilioProperties twilioProperties) {
+        return new TwilioSignatureValidationFilter(twilioProperties.authToken());
     }
 
     @Bean

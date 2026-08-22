@@ -1,10 +1,10 @@
 package ca.flowtxt.infrastructure.security;
 
 import ca.flowtxt.domain.model.User;
+import ca.flowtxt.infrastructure.config.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -15,7 +15,7 @@ import java.util.Date;
 /**
  * Issues and validates JWT bearer tokens (jjwt). The subject is the user's
  * email; the role and user id ride along as claims. The secret comes from
- * configuration (environment in production).
+ * validated configuration (environment in production).
  */
 @Component
 public final class JwtService {
@@ -23,11 +23,9 @@ public final class JwtService {
     private final SecretKey key;
     private final long expirationMs;
 
-    public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms}") long expirationMs) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+    public JwtService(JwtProperties properties) {
+        this.key = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
+        this.expirationMs = properties.expirationMs();
     }
 
     public String generateToken(User user) {

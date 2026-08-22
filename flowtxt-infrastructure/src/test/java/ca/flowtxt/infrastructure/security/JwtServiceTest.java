@@ -2,6 +2,7 @@ package ca.flowtxt.infrastructure.security;
 
 import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
+import ca.flowtxt.infrastructure.config.properties.JwtProperties;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -16,7 +17,8 @@ class JwtServiceTest {
     private static final String SECRET =
             "test-secret-that-is-at-least-32-characters-long-for-hs256";
 
-    private final JwtService jwtService = new JwtService(SECRET, 3600000L);
+    private final JwtService jwtService =
+            new JwtService(new JwtProperties(SECRET, 3600000L));
 
     private User sampleUser() {
         return new User(
@@ -58,7 +60,7 @@ class JwtServiceTest {
     @Test
     void rejectsATokenSignedWithADifferentSecret() {
         JwtService other = new JwtService(
-                "another-secret-that-is-also-long-enough-for-hs256-ok", 3600000L);
+                new JwtProperties("another-secret-that-is-also-long-enough-for-hs256-ok", 3600000L));
         String token = other.generateToken(sampleUser());
         assertFalse(jwtService.isValid(token));
     }

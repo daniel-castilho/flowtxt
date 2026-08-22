@@ -4,7 +4,6 @@ import ca.flowtxt.application.port.out.SmsService;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import org.springframework.beans.factory.annotation.Value;
 
 public final class TwilioSmsAdapter implements SmsService {
 
@@ -15,10 +14,7 @@ public final class TwilioSmsAdapter implements SmsService {
     private final String authToken;
     private final String fromNumber;
 
-    public TwilioSmsAdapter(
-            @Value("${twilio.account-sid}") String accountSid,
-            @Value("${twilio.auth-token}") String authToken,
-            @Value("${twilio.phone-number}") String fromNumber) {
+    public TwilioSmsAdapter(String accountSid, String authToken, String fromNumber) {
         this.accountSid = accountSid;
         this.authToken = authToken;
         this.fromNumber = fromNumber;

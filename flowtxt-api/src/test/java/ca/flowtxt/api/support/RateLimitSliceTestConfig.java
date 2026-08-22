@@ -1,6 +1,7 @@
 package ca.flowtxt.api.support;
 
 import ca.flowtxt.infrastructure.config.properties.RateLimitProperties;
+import ca.flowtxt.infrastructure.config.properties.TwilioProperties;
 import ca.flowtxt.infrastructure.security.filter.RateLimitFilter;
 import ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -25,6 +26,15 @@ public class RateLimitSliceTestConfig {
     public RateLimitProperties rateLimitProperties() {
         return new RateLimitProperties(
                 false, 20, Duration.ofMinutes(1), List.of("/auth/login"), "X-Forwarded-For");
+    }
+
+    /**
+     * Blank Twilio token on purpose: the signature filter fails closed per
+     * request, matching dev semantics; slices never exercise real webhooks.
+     */
+    @Bean
+    public TwilioProperties twilioProperties() {
+        return new TwilioProperties("", "", "");
     }
 
     @Bean
