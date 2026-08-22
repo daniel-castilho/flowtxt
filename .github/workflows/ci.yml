@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -130,3 +131,79 @@ jobs:
           path: |
             sbom.cdx.json
             image-digest.txt
+
+      # Release convention (README "Releases & Rollout"): pushes to main get
+      # an immutable sha-<short> tag plus the moving edge tag; v* milestone
+      # tags additionally publish the semver tag. Rollout deploys by pinning
+      # one of those immutable tags.
+      - name: Log in to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute release tags
+        if: github.event_name == 'push'
+        id: tags
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          IMAGE="ghcr.io/${OWNER,,}/flowtxt-api"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          TAGS=("$IMAGE:sha-$SHORT_SHA")
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            TAGS+=("$IMAGE:$VERSION")
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            TAGS+=("$IMAGE:edge")
+          fi
+          {
+            echo "image=$IMAGE"
+            printf 'tags=%s\n' "$(IFS=,; echo "${TAGS[*]}")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Push image to GHCR
+        if: github.event_name == 'push'
+        run: |
+          IFS=',' read -ra TAG_LIST <<< "${{ steps.tags.outputs.tags }}"
+          for tag in "${TAG_LIST[@]}"; do
+            docker tag "flowtxt-api:${{ github.sha }}" "$tag"
+            docker push "$tag"
+          done
+
+  # Publishes the GitHub Release for v* milestone tags: the production jar
+  # (renamed to carry the semver) and the SBOM of the exact shipped image.
+  release:
+    name: GitHub Release (jar + SBOM)
+    needs: [build, image]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the release and upload assets
+    steps:
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Stage release assets
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p release-assets
+          mv artifacts/flowtxt-api-jar/flowtxt-api-*.jar \
+            "release-assets/flowtxt-api-${VERSION}.jar"
+          cp artifacts/sbom/sbom.cdx.json \
+            "release-assets/flowtxt-api-${VERSION}.sbom.cdx.json"
+          ls -l release-assets
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --generate-notes \
+            release-assets/*
