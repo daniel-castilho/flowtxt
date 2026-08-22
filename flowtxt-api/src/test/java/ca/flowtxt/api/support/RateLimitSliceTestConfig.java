@@ -1,0 +1,40 @@
+package ca.flowtxt.api.support;
+
+import ca.flowtxt.infrastructure.config.properties.RateLimitProperties;
+import ca.flowtxt.infrastructure.security.filter.RateLimitFilter;
+import ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.time.Duration;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+
+/**
+ * Slice-test wiring for the rate limiting stack. Throttling is disabled here
+ * so controller slices exercise the controllers, not throttling — the
+ * behaviour itself is covered by {@code RateLimitFilterTest},
+ * {@code FixedWindowRateLimiterTest} and {@code LoginRateLimitIT}.
+ */
+@TestConfiguration(proxyBeanMethods = false)
+public class RateLimitSliceTestConfig {
+
+    @Bean
+    public RateLimitProperties rateLimitProperties() {
+        return new RateLimitProperties(
+                false, 20, Duration.ofMinutes(1), List.of("/auth/login"), "X-Forwarded-For");
+    }
+
+    @Bean
+    public FixedWindowRateLimiter fixedWindowRateLimiter(RateLimitProperties properties) {
+        return new FixedWindowRateLimiter(mock(StringRedisTemplate.class), properties);
+    }
+
+    @Bean
+    public RateLimitFilter rateLimitFilter(
+            RateLimitProperties properties, FixedWindowRateLimiter rateLimiter) {
+        return new RateLimitFilter(properties, rateLimiter);
+    }
+}

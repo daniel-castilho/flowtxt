@@ -1,6 +1,7 @@
 package ca.flowtxt.api.controller;
 
 import ca.flowtxt.api.exception.GlobalExceptionHandler;
+import ca.flowtxt.api.support.RateLimitSliceTestConfig;
 import ca.flowtxt.application.port.in.AuthenticateUserUseCase;
 import ca.flowtxt.application.port.in.RegisterUserUseCase;
 import ca.flowtxt.domain.model.Role;
@@ -27,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import({GlobalExceptionHandler.class, SecurityConfig.class, JwtAuthenticationFilter.class})
+@Import({GlobalExceptionHandler.class, SecurityConfig.class, JwtAuthenticationFilter.class,
+        RateLimitSliceTestConfig.class})
 class AuthControllerTest {
 
     @Autowired

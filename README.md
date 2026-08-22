@@ -123,6 +123,7 @@ curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"strongpass123"}'
 # → 200 {"token":"<jwt>", ...}
+# beyond the per-client rate limit → 429 + Retry-After header
 
 # use the token
 curl -X POST http://localhost:8080/contacts \
@@ -138,7 +139,7 @@ Interactive docs (Swagger UI): http://localhost:8080/swagger-ui.html.
 | Endpoint | Method | Auth | Description |
 | :--- | :--- | :--- | :--- |
 | `/auth/register` | `POST` | public | Register a user, returns a JWT. |
-| `/auth/login` | `POST` | public | Authenticate, returns a JWT. |
+| `/auth/login` | `POST` | public | Authenticate, returns a JWT. Rate-limited per client (429 + `Retry-After` beyond the limit). |
 | `/contacts` | `POST` | JWT | Register a contact. |
 | `/messages` | `POST` | JWT | Send an SMS to a contact. |
 | `/webhook/twilio/status` | `POST` | see debt¹ | Receives Twilio delivery-status callbacks and updates message status. |
@@ -149,9 +150,9 @@ Interactive docs (Swagger UI): http://localhost:8080/swagger-ui.html.
 
 ## Testing
 
-Pyramid of **60 unit tests** (domain → application → infrastructure → API slice) plus
-**6 integration tests** (`*IT`, Testcontainers with real PostgreSQL + Redis) covering repository
-adapters, the cache and the end-to-end security flow. Full guidance:
+Pyramid of **75 unit tests** (domain → application → infrastructure → API slice) plus
+**7 integration tests** (`*IT`, Testcontainers with real PostgreSQL + Redis) covering repository
+adapters, the cache, login rate limiting and the end-to-end security flow. Full guidance:
 [docs/testing-playbook.md](docs/testing-playbook.md).
 
 ## Security
@@ -174,6 +175,10 @@ adapters, the cache and the end-to-end security flow. Full guidance:
   equality by identity. No setters anywhere in the domain.
 - Contact + message flow with PostgreSQL persistence and Twilio/fake SMS adapters; provider
   failures now transition the message to `FAILED`.
+- **Login rate limiting**: `/auth/login` throttled by a Redis-backed fixed window per client
+  (first `X-Forwarded-For` hop, else remote address); beyond `rate-limit.limit` requests get
+  `429` + `Retry-After`. Atomic Lua script (no orphan keys), shared across replicas, fails open
+  (with a WARN log) if Redis is unavailable. Configurable via `RATE_LIMIT_*` env vars.
 - Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
   `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route authorization for
   Twilio callbacks still pending (see AGENTS debt).
@@ -187,7 +192,6 @@ adapters, the cache and the end-to-end security flow. Full guidance:
 
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
-- Rate limiting on `/auth/login` (Redis-backed).
 - TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
 - `PhoneNumber` full E.164 validation in the domain value object.
 - Fail-fast configuration validation at boot (12-factor factor 3).

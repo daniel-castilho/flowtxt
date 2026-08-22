@@ -53,6 +53,15 @@ twilio:
   auth-token: ${TWILIO_AUTH_TOKEN:dev-only-twilio-placeholder}
   phone-number: ${TWILIO_PHONE_NUMBER}
 
+# Login throttling: fixed-window counter per client IP in Redis (shared
+# across replicas). Dev defaults below; production overrides via RATE_LIMIT_*.
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  limit: ${RATE_LIMIT_LIMIT:20}
+  window: ${RATE_LIMIT_WINDOW:1m}
+  paths: ${RATE_LIMIT_PATHS:/auth/login}
+  client-ip-header: ${RATE_LIMIT_CLIENT_IP_HEADER:X-Forwarded-For}
+
 logging:
   level:
     root: INFO

@@ -14,4 +14,13 @@
         <Class name="ca.flowtxt.infrastructure.cache.RedisCacheAdapter"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+    <!--
+      FixedWindowRateLimiter stores the StringRedisTemplate injected by
+      Spring. Same rationale as RedisCacheAdapter above: framework-managed
+      collaborator, sharing the reference is the intended contract.
+    -->
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>

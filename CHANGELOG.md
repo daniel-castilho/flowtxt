@@ -6,6 +6,20 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+- **Rate limiting on `/auth/login`**: per-client fixed-window throttling backed by Redis,
+  mirroring the spotpobre-api reference design (security filter + typed properties + 3-level
+  tests) with two flowtxt adaptations — counters live in Redis (shared across replicas,
+  Twelve-Factor factor 6) and rejected requests answer `429 Too Many Requests` with a
+  `Retry-After` header. The client key is the first `X-Forwarded-For` hop (else remote address)
+  combined with method and path; the counter is incremented atomically by a Lua script
+  (`INCR` + conditional `PEXPIRE` + `PTTL`), so keys can never outlive their window
+  (coding-standards §6). The limiter fails open with a WARN log when Redis is unavailable
+  (availability of login beats best-effort throttling). Configurable via `rate-limit.*`
+  properties / `RATE_LIMIT_*` env vars (enabled, limit=20, window=1m, paths=[/auth/login],
+  client-ip-header). Covered by `FixedWindowRateLimiterTest`, `RateLimitFilterTest` (unit) and
+  `LoginRateLimitIT` (end-to-end against a real Redis container).
+
 ### Changed
 - **Persistence migrated from MongoDB to PostgreSQL 16** (ADR-0002): `spring-data-jpa`
   entities replace Mongo documents, adapters renamed `Mongo*Adapter` → `Jpa*Adapter`,

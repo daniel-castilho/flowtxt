@@ -22,7 +22,8 @@ Sources: `AGENTS.md` · `docs/coding-standards.md` · `docs/lessons.md` · coloc
    `ContactMapperTest`, `MessageMapperTest`, `UserMapperTest`, `RedisCacheAdapterTest`,
    `FakeSmsAdapterTest`).
 4. **API unit (slice)** — controllers via `@WebMvcTest` with mocked use cases + real
-   `SecurityConfig` (`AuthControllerTest`), and `GlobalExceptionHandlerTest`.
+   `SecurityConfig` (`AuthControllerTest`; the rate limiting stack is wired disabled via
+   `RateLimitSliceTestConfig`), and `GlobalExceptionHandlerTest`.
 5. **Integration (`*IT`, Testcontainers)** — the full application against real PostgreSQL + Redis
    containers: repository adapters (`JpaRepositoriesIT`), the cache adapter
    (`RedisCacheAdapterIT`) and the end-to-end security flow (`SecurityFlowIT`:
@@ -92,12 +93,15 @@ Docker, and runs in CI where Docker is present.
 | | `infrastructure/security/UserDetailsServiceImplTest` | Load by email, role authority |
 | | `infrastructure/persistence/mapper/*Test` | Contact/Message/User round-trips |
 | | `infrastructure/cache/RedisCacheAdapterTest` | put/get/remove (mocked) |
+| | `infrastructure/security/ratelimit/FixedWindowRateLimiterTest` | Redis fixed window: allow/reject/retry-after/fail-open |
+| | `infrastructure/security/filter/RateLimitFilterTest` | Key building, 429+Retry-After, chain gating |
 | | `infrastructure/sms/FakeSmsAdapterTest` | Fake SID |
 | API unit | `api/controller/AuthControllerTest` | register/login (201/200/400) |
 | | `api/exception/GlobalExceptionHandlerTest` | 400/400/500 mapping |
 | API IT | `api/AbstractIntegrationTest` | Base (containers) |
 | | `api/JpaRepositoriesIT` | Contact/User/Message persistence |
 | | `api/RedisCacheAdapterIT` | Real Redis put/get/remove |
+| | `api/LoginRateLimitIT` | Real Redis throttling E2E (429 + Retry-After) |
 | | `api/SecurityFlowIT` | E2E register→login→protected |
 
 When you change behaviour covered above, **extend the existing file** instead of inventing a

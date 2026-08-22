@@ -16,7 +16,7 @@ horizontal scaling.
 | 3 | Config | ⚠️ In progress | Environment-specific values live in env vars (`.env`, see `.env.example`): Twilio credentials and `JWT_SECRET`. **TBD:** validate all config at boot (fail-fast for missing prod values). |
 | 4 | Backing services | ✅ Attached resources | PostgreSQL + Redis are external resources addressed by URI/env (`docker/docker-compose.yaml`). No embedded servers. |
 | 5 | Build, release, run | ⚠️ Partial | Build = `./mvnw clean package`; run = `java -jar flowtxt-api/target/*.jar`. CI (`.github/workflows/ci.yml`) runs tests, quality gates and image build (non-root, Trivy, SBOM). **TBD:** explicit release tagging/rollout. |
-| 6 | Processes | ✅ Stateless | JWT stateless auth; no in-memory session state across requests. Rate limiting/cache belong in Redis (not yet implemented — see AGENTS debt). |
+| 6 | Processes | ✅ Stateless | JWT stateless auth; no in-memory session state across requests. Cross-process state (cache, login rate limiting) lives in Redis. |
 | 7 | Port binding | ✅ Self-contained | App exposes HTTP on `server.port` (8080) via Spring Boot; no external web server injected. |
 | 8 | Concurrency | ✅ Process-based | Scales by spawning processes; each is a copy of the same stateless app. |
 | 9 | Disposability | ✅ Fast boot/shutdown | Spring Boot boots quickly; graceful shutdown on SIGTERM. |

@@ -100,8 +100,12 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
   application port (api→infrastructure coupling beyond the composition root).
 - `PhoneNumber` validation is minimal (E.164-ish regex lives in the DTO; a domain-level value
   object validation with full E.164 is a candidate improvement).
-- No rate limiting on `/auth/login` (a Redis-backed limiter is a candidate).
 - `jjwt-jackson` still pulls Jackson 2 transitively for token serialization while the app runs Jackson 3; swap modules when jjwt ships a Jackson 3-compatible one.
+
+> Resolved 2026-08-21 (latest): `/auth/login` rate limiting shipped — Redis-backed fixed window
+> per client IP (`RateLimitFilter` + `FixedWindowRateLimiter` + `RateLimitProperties`),
+> 429 + `Retry-After`, fail-open on Redis outage. Removed from this list. See CHANGELOG and
+> tasks/flowtxt-excellence-backlog.md #2.
 
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
