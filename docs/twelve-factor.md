@@ -22,7 +22,7 @@ horizontal scaling.
 | 9 | Disposability | ✅ Fast boot/shutdown | Spring Boot boots quickly; graceful shutdown on SIGTERM. |
 | 10 | Dev/prod parity | ✅ Containers | `docker compose` (PostgreSQL + Redis) keeps local close to prod. |
 | 11 | Logs | ✅ Mostly | Output goes to stdout (Spring Boot + `console`). No app writes log files. Never log secrets (Twilio token masked). |
-| 12 | Admin processes | ⚠️ Partial | One-off tasks run as separate commands (e.g. DB seeding) — **TBD:** a `scripts/` convention for release-time admin steps. |
+| 12 | Admin processes | ✅ Compliant | One-off tasks run as separate processes from `scripts/` (seed data, psql shell, smoke test) against the same codebase, env-var config and backing services. Flyway owns schema changes. |
 
 Legend: ✅ compliant · ⚠️ partially compliant / has an open TODO.
 
@@ -36,4 +36,4 @@ Legend: ✅ compliant · ⚠️ partially compliant / has an open TODO.
 
 ## Open TODOs (tracked)
 
-1. `scripts/` for admin/one-off operations (e.g. seed data).
+None currently.

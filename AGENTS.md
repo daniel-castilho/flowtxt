@@ -126,6 +126,10 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > image tags and GitHub Releases with jar + SBOM. Convention lives in README "Releases &
 > Rollout". See CHANGELOG and docs/twelve-factor.md.
 
+> Resolved 2026-08-21 (latest): `scripts/` admin-process convention shipped (12-factor factor
+> 12): idempotent dev seeding via the REST API, psql wrapper, smoke test; duplicate contact
+> phones now answer 409 instead of a raw 500. See CHANGELOG, scripts/README.md.
+
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
 > classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test

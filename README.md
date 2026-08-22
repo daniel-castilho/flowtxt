@@ -107,6 +107,9 @@ http://localhost:8080/swagger-ui.html.
 | Static analysis | `./mvnw spotbugs:check` |
 | Dependency check | `./mvnw dependency-check:check -DfailBuildOnAnyVulnerability=false` |
 | Production build | `./mvnw clean package` → `flowtxt-api/target/flowtxt-api-1.0-SNAPSHOT.jar` |
+| Seed demo dev data | `./scripts/seed-dev-data.sh` (idempotent, API-based) |
+| Database shell | `./scripts/psql.sh` |
+| Smoke test | `./scripts/smoke-test.sh` (boots the whole stack) |
 
 ## Authentication
 

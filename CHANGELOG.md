@@ -22,6 +22,12 @@ All notable changes to this project are documented in this file. The format is b
   class now truncates all tables before each test, making every `*IT` independent of order.
 
 ### Added
+- **`scripts/` convention for one-off admin processes** (Twelve-Factor factor 12): a documented
+  home for operational tasks sharing the app's env-var contract — an idempotent
+  `seed-dev-data.sh` (demo user + contacts through the REST API, duplicate-safe via the new 409),
+  a `psql.sh` wrapper for the compose database and the existing `smoke-test.sh` (now builds
+  upstream modules in-reactor so it can never boot stale SNAPSHOTs from the local repository).
+  All scripts pass shellcheck.
 - **Release tagging/rollout convention** (Twelve-Factor factor 5): CI now publishes the
   production image to GHCR on every `main` push — an immutable `sha-<short7>` tag plus a moving
   `edge` tag — and, for annotated `v*` milestone tags, an additional semver image tag plus a
@@ -57,6 +63,11 @@ All notable changes to this project are documented in this file. The format is b
   `LoginRateLimitIT` (end-to-end against a real Redis container).
 
 ### Changed
+- **Duplicate contact phone numbers now answer 409 Conflict** instead of leaking a raw 500:
+  `RegisterContactUseCase` checks the repository first and raises a state-conflict
+  (`IllegalStateException`, mapped by the existing handler) before attempting the insert; the
+  previous behaviour surfaced a PostgreSQL unique-constraint violation through the generic error
+  path. Covered by new `RegisterContactUseCaseImplTest`.
 - **`CacheService.put` now requires a positive TTL** (coding-standards §6): the port signature
   gained a mandatory `java.time.Duration ttl`, making an unbounded key unrepresentable at
   compile time; the Redis adapter rejects null/zero/negative TTLs and writes through
