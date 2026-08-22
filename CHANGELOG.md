@@ -36,6 +36,12 @@ All notable changes to this project are documented in this file. The format is b
   `LoginRateLimitIT` (end-to-end against a real Redis container).
 
 ### Changed
+- **`PhoneNumber` now enforces strict ITU-T E.164 in the domain value object**: a leading plus
+  is mandatory and the number may carry at most 15 digits with no leading zero in the country
+  code (`\+[1-9]\d{1,14}`). Validation lives where the invariant belongs (the record's compact
+  constructor, pure Java) instead of an optional-plus regex on the DTO; `ContactRequest` keeps a
+  mirrored edge-level pattern. Requests with non-E.164 numbers now fail with 400 — previously
+  `"5511999999999"` (no plus) was accepted end to end.
 - **Persistence migrated from MongoDB to PostgreSQL 16** (ADR-0002): `spring-data-jpa`
   entities replace Mongo documents, adapters renamed `Mongo*Adapter` → `Jpa*Adapter`,
   `docker-compose` runs `postgres:16`, and the schema is owned by **Flyway**

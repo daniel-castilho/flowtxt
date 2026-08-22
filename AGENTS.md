@@ -98,9 +98,11 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
   provider failures are handled with a FAILED transition since 2026-08-21.
 - `AuthController` injects the infrastructure `JwtService` directly instead of going through an
   application port (api→infrastructure coupling beyond the composition root).
-- `PhoneNumber` validation is minimal (E.164-ish regex lives in the DTO; a domain-level value
-  object validation with full E.164 is a candidate improvement).
 - `jjwt-jackson` still pulls Jackson 2 transitively for token serialization while the app runs Jackson 3; swap modules when jjwt ships a Jackson 3-compatible one.
+
+> Resolved 2026-08-21 (latest): `PhoneNumber` now enforces strict E.164 in the domain value
+> object (`+[1-9]\d{1,14}`); the DTO pattern mirrors it. Removed from this list. See CHANGELOG
+> and tasks/flowtxt-excellence-backlog.md #3.
 
 > Resolved 2026-08-21 (latest): `/auth/login` rate limiting shipped — Redis-backed fixed window
 > per client IP (`RateLimitFilter` + `FixedWindowRateLimiter` + `RateLimitProperties`),

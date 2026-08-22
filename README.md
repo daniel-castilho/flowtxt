@@ -172,7 +172,8 @@ adapters, the cache, login rate limiting and the end-to-end security flow. Full 
   persistence in PostgreSQL.
 - **Rich immutable domain model**: entities with behaviour (`Message` guards its forward-only
   status lifecycle; invalid transitions map to HTTP 409), factories instead of builders,
-  equality by identity. No setters anywhere in the domain.
+  equality by identity, and value objects that validate themselves (`PhoneNumber` enforces
+  strict ITU-T E.164). No setters anywhere in the domain.
 - Contact + message flow with PostgreSQL persistence and Twilio/fake SMS adapters; provider
   failures now transition the message to `FAILED`.
 - **Login rate limiting**: `/auth/login` throttled by a Redis-backed fixed window per client
@@ -192,7 +193,6 @@ adapters, the cache, login rate limiting and the end-to-end security flow. Full 
 
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
-- TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
-- `PhoneNumber` full E.164 validation in the domain value object.
 - Fail-fast configuration validation at boot (12-factor factor 3).
+- TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
 - Raise the JaCoCo coverage target further (0.40 → 0.50+) as the suite grows.
