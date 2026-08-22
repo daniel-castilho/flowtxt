@@ -6,6 +6,21 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Fixed
+- **Optimistic locking was defeated on every message update past the first**: the immutable
+  domain `Message` cannot carry JPA's `@Version`, and `JpaMessageRepositoryAdapter` remapped it
+  onto a fresh entity per save, resetting the version to 0. The first status write passed by
+  luck; any subsequent lifecycle write (e.g. a real Twilio `SENT -> DELIVERED` callback
+  sequence) failed with a false concurrent-modification conflict (HTTP 500). The adapter now
+  persists load-then-apply: existing rows are loaded as managed entities and updated in place
+  (`MessageMapper.apply`, `@MappingTarget`, version explicitly untouched, transactional), fresh
+  mapping only for brand-new aggregates. `MessageEntity` regained business-field setters so the
+  mapper's update path is not silently generated as a no-op.
+- **Integration tests collided on shared PostgreSQL state**: fixed fixtures (e.g. contact phone
+  `+5511999999999` created by `SecurityFlowIT` and re-inserted by `JpaRepositoriesIT`) made
+  classes fail with duplicate-key errors depending on execution order. The Testcontainers base
+  class now truncates all tables before each test, making every `*IT` independent of order.
+
 ### Added
 - **Rate limiting on `/auth/login`**: per-client fixed-window throttling backed by Redis,
   mirroring the spotpobre-api reference design (security filter + typed properties + 3-level

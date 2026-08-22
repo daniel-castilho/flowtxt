@@ -107,6 +107,11 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > 429 + `Retry-After`, fail-open on Redis outage. Removed from this list. See CHANGELOG and
 > tasks/flowtxt-excellence-backlog.md #2.
 
+> Resolved 2026-08-21 (later): the message adapter was silently defeating `@Version` (immutable
+> domain remapped to fresh entities, version reset to 0) — fixed via load-then-apply persistence;
+> IT classes now truncate shared PostgreSQL tables before each test, killing order-dependent
+> duplicate-key collisions. See CHANGELOG ("Fixed") and docs/lessons.md.
+
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
 > classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test

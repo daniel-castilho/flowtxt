@@ -116,7 +116,7 @@ parallel suite.
 | **Auth** | Register 201 + token; duplicate email 400; weak password 400; login 200 + token; wrong password 400 |
 | **Security** | `/contacts` and `/messages` without token → 401; with token → 200; `/auth/**` public |
 | **Contacts** | Create → persisted → found by phone number |
-| **Messages** | Create → persisted; `updateStatusBySid` flips status; found by id |
+| **Messages** | Create → persisted; lifecycle transitions persist with `@Version` intact; found by sid |
 | **Users** | Create → persisted → found by email |
 | **Cache** | put → get → remove (real Redis) |
 | **Boundaries** | `domain/` + `application/` free of Spring/Twilio/JJWT imports (grep in AGENTS.md) |

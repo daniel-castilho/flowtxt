@@ -74,3 +74,34 @@ CI's hermetic runner had no such service and went red on day one of actually run
 **Rule:** after changing connection configuration, verify which address the client ACTUALLY
 dials (log it once) instead of trusting a green local run; treat any pass that could be served
 by an unrelated host service as unproven.
+
+---
+
+## Research a precise failure signature before debugging by trial and error (2026-08-21)
+
+The integration failures had a crisp, searchable signature
+(`ObjectOptimisticLockingFailureException` + `@Version` + assigned id). A web search over that
+signature surfaced the exact mechanism in minutes (Spring Data state detection, Hibernate's
+strict merge) plus the accepted fix pattern — no speculative code changes were needed at any
+point. Guess-first would have burned a fix-run cycle on each wrong hypothesis.
+
+**Rule:** when a failure has a precise exception/symptom signature, search the web first
+(Spring Data issues, Hibernate discourse, Stack Overflow), confirm the mechanism against our
+own code/generated artifacts, and only then implement.
+
+---
+
+## Immutable aggregates must be persisted load-then-apply, never blind-remapped (2026-08-21)
+
+The immutable domain `Message` cannot carry JPA bookkeeping fields. Mapping it onto a FRESH
+entity on every save reset `@Version` to 0: the first update passed by luck (version matched)
+and any subsequent write died with a false "Row was already updated or deleted by another
+transaction". This broke real Twilio callback sequences (`SENT -> DELIVERED`), not just tests.
+Compounding trap: MapStruct silently generated a no-op for `@MappingTarget` because the entity
+had lost its setters in the Lombok purge — check generated sources when mapper behaviour looks
+inert.
+
+**Rule:** adapters persisting versioned entities load the managed row first and apply state via
+an explicit update method (`@MappingTarget`, version explicitly ignored); fresh mapping happens
+only for brand-new aggregates. Never let a mapper rebuild a versioned entity from scratch on an
+update path.
