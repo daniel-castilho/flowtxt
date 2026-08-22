@@ -4,6 +4,8 @@ import ca.flowtxt.application.port.out.CacheService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 public class RedisCacheAdapter implements CacheService {
 
@@ -14,8 +16,12 @@ public class RedisCacheAdapter implements CacheService {
     }
 
     @Override
-    public void put(final String key, final Object value) {
-        redisTemplate.opsForValue().set(key, value);
+    public void put(final String key, final Object value, final Duration ttl) {
+        if (ttl == null || ttl.isNegative() || ttl.isZero()) {
+            throw new IllegalArgumentException(
+                    "Cache TTL must be positive — unbounded keys are not allowed (coding-standards §6)");
+        }
+        redisTemplate.opsForValue().set(key, value, ttl);
     }
 
     @Override

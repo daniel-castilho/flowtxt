@@ -7,7 +7,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,13 +25,23 @@ class RedisCacheAdapterTest {
     private ValueOperations<String, Object> valueOperations;
 
     @Test
-    void putsAValueInRedis() {
+    void putsAValueWithItsTtlInRedis() {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         RedisCacheAdapter adapter = new RedisCacheAdapter(redisTemplate);
 
-        adapter.put("key", "value");
+        adapter.put("key", "value", Duration.ofMinutes(5));
 
-        verify(valueOperations).set("key", "value");
+        verify(valueOperations).set("key", "value", Duration.ofMinutes(5));
+    }
+
+    @Test
+    void rejectsNullAndNonPositiveTtls() {
+        RedisCacheAdapter adapter = new RedisCacheAdapter(redisTemplate);
+
+        assertThrows(IllegalArgumentException.class, () -> adapter.put("k", "v", null));
+        assertThrows(IllegalArgumentException.class, () -> adapter.put("k", "v", Duration.ZERO));
+        assertThrows(IllegalArgumentException.class,
+                () -> adapter.put("k", "v", Duration.ofSeconds(-1)));
     }
 
     @Test
