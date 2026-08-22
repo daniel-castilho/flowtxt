@@ -5,6 +5,7 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  workflow_dispatch:   # manual rehearsal of any ref on real runners
 
 permissions:
   contents: read
@@ -17,6 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # Static analysis of the workflows themselves (schema, ${{ }}
+      # expressions, embedded shellcheck) — catches pipeline mistakes before
+      # they burn a full runner run.
+      - name: Lint GitHub Actions workflows
+        uses: docker://rhysd/actionlint:latest
 
       - uses: actions/setup-java@v5
         with:

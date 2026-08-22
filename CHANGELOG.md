@@ -28,7 +28,10 @@ All notable changes to this project are documented in this file. The format is b
   GitHub Release carrying the versioned jar and the CycloneDX SBOM of the exact shipped image.
   Images were previously built and discarded inside the workflow; nothing was pushed anywhere.
   Convention documented in README "Releases & Rollout" (cut release = annotated tag; rollout =
-  pin an immutable tag; rollback = previous immutable tag).
+  pin an immutable tag; rollback = previous immutable tag). Pipeline hardening: actionlint runs
+  as the first CI gate (workflow schema, expressions, embedded shellcheck) and `workflow_dispatch`
+  enables full-gate rehearsals of any ref without touching main; local validation recipe recorded
+  in docs/lessons.md.
 - **Fail-fast configuration validation at boot** (Twelve-Factor factor 3): a
   `StartupConfigValidator` runs during context creation — before the web server accepts any
   traffic — and refuses to start with one aggregated, actionable report instead of failing on

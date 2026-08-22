@@ -105,3 +105,29 @@ inert.
 an explicit update method (`@MappingTarget`, version explicitly ignored); fresh mapping happens
 only for brand-new aggregates. Never let a mapper rebuild a versioned entity from scratch on an
 update path.
+
+---
+
+## Validate GitHub Actions workflows in three local layers before burning a runner (2026-08-21)
+
+Workflow YAML is not executable locally: registry auth (`GITHUB_TOKEN`), GHCR, the Releases API
+and event variables only exist inside GitHub. But "can't run locally" does not mean "can't be
+verified locally" — three layers cover almost everything:
+
+1. **actionlint** (official Docker image `rhysd/actionlint:latest`, stdin-friendly) — schema,
+   `${{ }}` expressions and embedded shellcheck of `run:` blocks; also wired as the first CI
+   gate so regressions die cheaply.
+2. **Extracted `run:` scripts with mocked env** — copy the block verbatim into a bash script,
+   feed fake `GITHUB_SHA`/`GITHUB_REF`/`GITHUB_OUTPUT`, assert outputs for each trajectory.
+   Caveat learned twice: runners use bash; local shells may be zsh — run the simulation through
+   explicit `bash`.
+3. **`workflow_dispatch` trigger** — full-gate rehearsal of any ref on a real runner without
+   touching `main`; publish steps stay event-gated and skipped.
+
+Residual platform-only risk stays explicitly bounded: first package push to GHCR (repo/org
+package settings), `gh release create`, artifact layout assumptions — contained by ordering
+(push after gates, release after image), so failure is visible with no bad artifact shipped.
+
+**Rule:** before pushing workflow changes, run actionlint + simulate every new `run:` block per
+trajectory; rehearse on `workflow_dispatch`; state precisely which risks only a real event can
+retire.
