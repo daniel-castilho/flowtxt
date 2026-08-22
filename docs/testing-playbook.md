@@ -118,7 +118,7 @@ parallel suite.
 | **Contacts** | Create → persisted → found by phone number |
 | **Messages** | Create → persisted; lifecycle transitions persist with `@Version` intact; found by sid |
 | **Users** | Create → persisted → found by email |
-| **Cache** | put → get → remove (real Redis) |
+| **Cache** | put (with TTL) → get → remove; entries expire after the TTL (real Redis) |
 | **Boundaries** | `domain/` + `application/` free of Spring/Twilio/JJWT imports (grep in AGENTS.md) |
 | **Stack** | Java 21, Spring Boot 4.1.x, PostgreSQL 16, Redis 7 — no version drift |
 

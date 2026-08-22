@@ -197,5 +197,4 @@ adapters, the cache, login rate limiting and the end-to-end security flow. Full 
 
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
-- TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
 - Raise the JaCoCo coverage target further (0.40 → 0.50+) as the suite grows.

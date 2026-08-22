@@ -92,8 +92,6 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 
 ## Known technical debt (resolve later; flag, don't silently fix)
 
-- `CacheService.put` / `RedisCacheAdapter` set no TTL, violating coding-standards §6 ("always
-  set a TTL"); keys can live forever.
 - `SendMessageUseCaseImpl` persists twice by design (PENDING audit trail, then SENT/FAILED);
   provider failures are handled with a FAILED transition since 2026-08-21.
 - `AuthController` injects the infrastructure `JwtService` directly instead of going through an
@@ -118,6 +116,10 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > `StartupConfigValidator` + typed `JwtProperties`/`TwilioProperties`; aggregated boot report,
 > dev placeholder secret and missing Twilio credentials rejected outside dev. Production must run
 > with `SPRING_PROFILES_ACTIVE=prod`. See CHANGELOG and docs/twelve-factor.md.
+
+> Resolved 2026-08-21 (latest): `CacheService.put` now requires a positive TTL (port signature
+> makes unbounded keys unrepresentable — coding-standards §6); expiry covered by unit test and a
+> real-Redis IT. See CHANGELOG.
 
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable

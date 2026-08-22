@@ -47,6 +47,11 @@ All notable changes to this project are documented in this file. The format is b
   `LoginRateLimitIT` (end-to-end against a real Redis container).
 
 ### Changed
+- **`CacheService.put` now requires a positive TTL** (coding-standards §6): the port signature
+  gained a mandatory `java.time.Duration ttl`, making an unbounded key unrepresentable at
+  compile time; the Redis adapter rejects null/zero/negative TTLs and writes through
+  `set(key, value, ttl)`. Expiry is proven by a unit test and a real-Redis integration test.
+  No production callers existed yet — the contract was fixed before first use.
 - **`PhoneNumber` now enforces strict ITU-T E.164 in the domain value object**: a leading plus
   is mandatory and the number may carry at most 15 digits with no leading zero in the country
   code (`\+[1-9]\d{1,14}`). Validation lives where the invariant belongs (the record's compact
