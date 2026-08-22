@@ -129,7 +129,9 @@ technical debt". The hard rule lives in `AGENTS.md` § *Critical rules* (rule 8)
 
 - Imperative commit subject: `Add JWT authentication to the API layer`
 - Small, focused commits; do **not** push unless the human asks.
-- Annotated tags only at milestones with the Definition of Done met.
+- Annotated tags only at milestones with the Definition of Done met. Tagging a
+  milestone (`git tag -a vX.Y.Z`) triggers CI to publish the semver image and
+  the GitHub Release — full convention in README "Releases & Rollout".
 
 ## 10. Security
 

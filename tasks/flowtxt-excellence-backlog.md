@@ -12,5 +12,5 @@ Candidate backlog, ordered by value/risk. Status: **open** unless noted.
 | 4b | TTL support on `CacheService.put` / Redis adapter (coding-standards §6) | Cache hygiene / unbounded keys risk | **done** (2026-08-21): TTL is a mandatory port parameter; non-positive values rejected; expiry proven against real Redis |
 | 5 | Raise JaCoCo coverage target | Quality bar | **done** (2026-08-21): 0.10 → 0.40 per module; next step 0.50+ |
 | 5b | Purge Lombok from persistence documents (records) and drop the dependency (Phase C) | Consistency with the rich immutable domain | **done** (2026-08-21): zero Lombok in sources or POMs |
-| 6 | Release tagging/rollout convention (image + jar per commit) | Operability | open |
+| 6 | Release tagging/rollout convention (image + jar per commit) | Operability | **done** (2026-08-21): GHCR push on `main` (immutable `sha-<short>` + moving `edge`); `v*` annotated tags publish semver image + GitHub Release with jar/SBOM; convention in README "Releases & Rollout" |
 | 7 | `scripts/` for admin/one-off operations (e.g. seed data) | Operability | open |

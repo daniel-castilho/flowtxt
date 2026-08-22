@@ -15,7 +15,7 @@ horizontal scaling.
 | 2 | Dependencies | ✅ Declared & locked | `pom.xml` per module + Maven wrapper (`./mvnw`). Reproducible via `./mvnw clean package`. |
 | 3 | Config | ✅ Compliant | Environment-specific values live in env vars (`.env`, see `.env.example`): Twilio credentials and `JWT_SECRET`. `StartupConfigValidator` fails the boot with an aggregated report when required config is missing/invalid — and outside dev it rejects the dev placeholder secret and missing Twilio credentials outright. |
 | 4 | Backing services | ✅ Attached resources | PostgreSQL + Redis are external resources addressed by URI/env (`docker/docker-compose.yaml`). No embedded servers. |
-| 5 | Build, release, run | ⚠️ Partial | Build = `./mvnw clean package`; run = `java -jar flowtxt-api/target/*.jar`. CI (`.github/workflows/ci.yml`) runs tests, quality gates and image build (non-root, Trivy, SBOM). **TBD:** explicit release tagging/rollout. |
+| 5 | Build, release, run | ✅ Compliant | Build = `./mvnw clean package`; run = `java -jar flowtxt-api/target/*.jar`. CI (`.github/workflows/ci.yml`) runs tests, quality gates and image build (non-root, Trivy, SBOM). Every `main` push publishes an immutable `sha-<short>` image tag (+ moving `edge`) to GHCR; annotated `v*` tags publish semver image tags and a GitHub Release with the versioned jar + SBOM. Rollout = pin an immutable tag (see README "Releases & Rollout"). |
 | 6 | Processes | ✅ Stateless | JWT stateless auth; no in-memory session state across requests. Cross-process state (cache, login rate limiting) lives in Redis. |
 | 7 | Port binding | ✅ Self-contained | App exposes HTTP on `server.port` (8080) via Spring Boot; no external web server injected. |
 | 8 | Concurrency | ✅ Process-based | Scales by spawning processes; each is a copy of the same stateless app. |
@@ -36,5 +36,4 @@ Legend: ✅ compliant · ⚠️ partially compliant / has an open TODO.
 
 ## Open TODOs (tracked)
 
-1. Release tagging/rollout convention (image + jar versioned per commit).
-2. `scripts/` for admin/one-off operations (e.g. seed data).
+1. `scripts/` for admin/one-off operations (e.g. seed data).

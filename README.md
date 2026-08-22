@@ -31,6 +31,7 @@ authentication.
 - [API & Documentation](#api--documentation)
 - [Testing](#testing)
 - [Security](#security)
+- [Releases & Rollout](#releases--rollout)
 - [Current State](#current-state)
 - [Roadmap](#roadmap)
 
@@ -165,6 +166,40 @@ adapters, the cache, login rate limiting and the end-to-end security flow. Full 
   `application.yaml` is a dev-only placeholder that production must override.
 - CI gates: SpotBugs, OWASP Dependency Check, Trivy (HIGH/CRITICAL) on the container image,
   CodeQL, Dependency Review.
+
+## Releases & Rollout
+
+One pipeline, three artifact tiers (all built by the same CI run, so a commit
+always maps to the same jar and image):
+
+| Trigger | Artifacts | Where |
+| :--- | :--- | :--- |
+| Push to `main` | Image `ghcr.io/daniel-castilho/flowtxt-api:sha-<short7>` (immutable) + `:edge` (moving) | GHCR |
+| Annotated tag `vX.Y.Z` | Image `ghcr.io/daniel-castilho/flowtxt-api:X.Y.Z` + GitHub Release with `flowtxt-api-X.Y.Z.jar` and SBOM | GHCR + GitHub Releases |
+
+**Cutting a release** (milestone with the Definition of Done met — coding
+standards §9):
+
+```sh
+git checkout main && git pull
+git tag -a v1.0.0 -m "Release 1.0.0" && git push origin v1.0.0
+```
+
+CI runs every gate on the tagged commit, publishes the semver image tag,
+and opens the GitHub Release with auto-generated notes plus the jar and the
+CycloneDX SBOM of the exact shipped image.
+
+**Rolling out**: deploy by pinning an immutable tag — never a moving one:
+
+```sh
+docker run -d --restart unless-stopped \
+  --env-file .env \
+  -p 8080:8080 \
+  ghcr.io/daniel-castilho/flowtxt-api:1.0.0
+```
+
+Rollback = re-run against the previous immutable tag. The Maven version stays
+`1.0-SNAPSHOT` in development; release naming comes from git tags.
 
 ## Current State
 

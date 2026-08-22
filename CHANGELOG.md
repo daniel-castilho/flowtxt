@@ -22,6 +22,13 @@ All notable changes to this project are documented in this file. The format is b
   class now truncates all tables before each test, making every `*IT` independent of order.
 
 ### Added
+- **Release tagging/rollout convention** (Twelve-Factor factor 5): CI now publishes the
+  production image to GHCR on every `main` push — an immutable `sha-<short7>` tag plus a moving
+  `edge` tag — and, for annotated `v*` milestone tags, an additional semver image tag plus a
+  GitHub Release carrying the versioned jar and the CycloneDX SBOM of the exact shipped image.
+  Images were previously built and discarded inside the workflow; nothing was pushed anywhere.
+  Convention documented in README "Releases & Rollout" (cut release = annotated tag; rollout =
+  pin an immutable tag; rollback = previous immutable tag).
 - **Fail-fast configuration validation at boot** (Twelve-Factor factor 3): a
   `StartupConfigValidator` runs during context creation — before the web server accepts any
   traffic — and refuses to start with one aggregated, actionable report instead of failing on

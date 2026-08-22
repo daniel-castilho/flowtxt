@@ -121,6 +121,11 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > makes unbounded keys unrepresentable — coding-standards §6); expiry covered by unit test and a
 > real-Redis IT. See CHANGELOG.
 
+> Resolved 2026-08-21 (latest): release convention shipped (12-factor factor 5) — GHCR push per
+> `main` commit (immutable `sha-<short>` + moving `edge`), `v*` annotated tags publish semver
+> image tags and GitHub Releases with jar + SBOM. Convention lives in README "Releases &
+> Rollout". See CHANGELOG and docs/twelve-factor.md.
+
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
 > classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test
