@@ -114,6 +114,11 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 > IT classes now truncate shared PostgreSQL tables before each test, killing order-dependent
 > duplicate-key collisions. See CHANGELOG ("Fixed") and docs/lessons.md.
 
+> Resolved 2026-08-21 (latest): fail-fast config validation at boot shipped (12-factor factor 3):
+> `StartupConfigValidator` + typed `JwtProperties`/`TwilioProperties`; aggregated boot report,
+> dev placeholder secret and missing Twilio credentials rejected outside dev. Production must run
+> with `SPRING_PROFILES_ACTIVE=prod`. See CHANGELOG and docs/twelve-factor.md.
+
 > Resolved 2026-08-21: legacy Portuguese comments/logs were fully translated to English; the
 > Twilio delivery-status webhook was implemented; domain models were rewritten as rich immutable
 > classes (Lombok removed from the domain); SpotBugs gate restored to green; integration-test

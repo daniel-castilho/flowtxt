@@ -176,6 +176,10 @@ adapters, the cache, login rate limiting and the end-to-end security flow. Full 
   strict ITU-T E.164). No setters anywhere in the domain.
 - Contact + message flow with PostgreSQL persistence and Twilio/fake SMS adapters; provider
   failures now transition the message to `FAILED`.
+- **Fail-fast configuration validation**: the boot aborts with one aggregated report when
+  required config is missing/invalid (unresolved placeholders, short JWT secrets, missing Twilio
+  credentials outside dev). Production must run with `SPRING_PROFILES_ACTIVE=prod` so the strict
+  rules apply.
 - **Login rate limiting**: `/auth/login` throttled by a Redis-backed fixed window per client
   (first `X-Forwarded-For` hop, else remote address); beyond `rate-limit.limit` requests get
   `429` + `Retry-After`. Atomic Lua script (no orphan keys), shared across replicas, fails open
@@ -193,6 +197,5 @@ adapters, the cache, login rate limiting and the end-to-end security flow. Full 
 
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
-- Fail-fast configuration validation at boot (12-factor factor 3).
 - TTL support on `CacheService.put` / Redis adapter (coding-standards §6 requires a TTL).
 - Raise the JaCoCo coverage target further (0.40 → 0.50+) as the suite grows.

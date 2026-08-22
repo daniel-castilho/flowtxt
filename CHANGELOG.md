@@ -22,6 +22,17 @@ All notable changes to this project are documented in this file. The format is b
   class now truncates all tables before each test, making every `*IT` independent of order.
 
 ### Added
+- **Fail-fast configuration validation at boot** (Twelve-Factor factor 3): a
+  `StartupConfigValidator` runs during context creation — before the web server accepts any
+  traffic — and refuses to start with one aggregated, actionable report instead of failing on
+  the first request. Always enforced: `jwt.secret` present, free of unresolved `${...}`
+  placeholders, and at least 32 bytes (HS256); `jwt.expiration-ms` positive. Enforced outside
+  dev (`SPRING_PROFILES_ACTIVE != dev`): the known dev-only placeholder secret is rejected and
+  Twilio credentials must be present, placeholder-free, with an E.164 origin number (validated
+  through the domain value object). Config is now bound to typed `JwtProperties`/`
+  TwilioProperties` records; consumers (`JwtService`, `SmsConfig`, the Twilio signature filter)
+  migrated off scattered `@Value` annotations, and `twilio.*` yaml defaults became empty-safe so
+  missing env vars can no longer bind the literal `"${VAR}"` string silently.
 - **Rate limiting on `/auth/login`**: per-client fixed-window throttling backed by Redis,
   mirroring the spotpobre-api reference design (security filter + typed properties + 3-level
   tests) with two flowtxt adaptations — counters live in Redis (shared across replicas,

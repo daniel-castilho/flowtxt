@@ -13,7 +13,7 @@ horizontal scaling.
 | - | ------- | -------------- | ----- |
 | 1 | Codebase | ✅ One repo, one app | Git repo `daniel-castilho/flowtxt`, `main` branch. Multi-module Maven reactor (one deployable artifact: `flowtxt-api`). |
 | 2 | Dependencies | ✅ Declared & locked | `pom.xml` per module + Maven wrapper (`./mvnw`). Reproducible via `./mvnw clean package`. |
-| 3 | Config | ⚠️ In progress | Environment-specific values live in env vars (`.env`, see `.env.example`): Twilio credentials and `JWT_SECRET`. **TBD:** validate all config at boot (fail-fast for missing prod values). |
+| 3 | Config | ✅ Compliant | Environment-specific values live in env vars (`.env`, see `.env.example`): Twilio credentials and `JWT_SECRET`. `StartupConfigValidator` fails the boot with an aggregated report when required config is missing/invalid — and outside dev it rejects the dev placeholder secret and missing Twilio credentials outright. |
 | 4 | Backing services | ✅ Attached resources | PostgreSQL + Redis are external resources addressed by URI/env (`docker/docker-compose.yaml`). No embedded servers. |
 | 5 | Build, release, run | ⚠️ Partial | Build = `./mvnw clean package`; run = `java -jar flowtxt-api/target/*.jar`. CI (`.github/workflows/ci.yml`) runs tests, quality gates and image build (non-root, Trivy, SBOM). **TBD:** explicit release tagging/rollout. |
 | 6 | Processes | ✅ Stateless | JWT stateless auth; no in-memory session state across requests. Cross-process state (cache, login rate limiting) lives in Redis. |
@@ -36,6 +36,5 @@ Legend: ✅ compliant · ⚠️ partially compliant / has an open TODO.
 
 ## Open TODOs (tracked)
 
-1. Validate all environment variables at startup (fail-fast for prod).
-2. Release tagging/rollout convention (image + jar versioned per commit).
-3. `scripts/` for admin/one-off operations (e.g. seed data).
+1. Release tagging/rollout convention (image + jar versioned per commit).
+2. `scripts/` for admin/one-off operations (e.g. seed data).
