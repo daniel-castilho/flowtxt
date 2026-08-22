@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 class SendMessageUseCaseImplTest {
 
     private static final String FROM = "6477052644";
-    private static final String TO = "6477052655";
+    private static final String TO = "+16477052655";
     private static final String CONTENT = "Hello World";
 
     private ContactRepository contactRepository;

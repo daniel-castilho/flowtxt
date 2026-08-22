@@ -8,6 +8,8 @@ public record ContactRequest(
         String name,
 
         @NotBlank(message = "Phone number is required")
-        @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Invalid phone number format")
+        // Edge-level mirror of the authoritative domain rule (PhoneNumber):
+        // strict E.164, leading plus required.
+        @Pattern(regexp = "^\\+[1-9]\\d{1,14}$", message = "Invalid phone number format")
         String phoneNumber
 ) {}

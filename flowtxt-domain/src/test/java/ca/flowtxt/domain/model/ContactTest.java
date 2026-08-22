@@ -13,17 +13,17 @@ class ContactTest {
 
     @Test
     void createGeneratesAnIdentityAndKeepsTheGivenData() {
-        Contact contact = Contact.create("Daniel Castilho", new PhoneNumber("6477052644"));
+        Contact contact = Contact.create("Daniel Castilho", new PhoneNumber("+16477052644"));
 
         assertNotNull(contact.getId());
         assertEquals("Daniel Castilho", contact.getName());
-        assertEquals("6477052644", contact.getPhoneNumber().value());
+        assertEquals("+16477052644", contact.getPhoneNumber().value());
     }
 
     @Test
     void rejectsABlankName() {
         assertThrows(IllegalArgumentException.class,
-                () -> Contact.create("   ", new PhoneNumber("6477052644")));
+                () -> Contact.create("   ", new PhoneNumber("+16477052644")));
     }
 
     @Test
@@ -34,13 +34,13 @@ class ContactTest {
     @Test
     void equalityIsByIdentityNotByFieldState() {
         UUID id = UUID.randomUUID();
-        Contact original = new Contact(id, "Daniel Castilho", new PhoneNumber("6477052644"));
+        Contact original = new Contact(id, "Daniel Castilho", new PhoneNumber("+16477052644"));
         Contact reloaded = new Contact(id, "Different Name", new PhoneNumber("+15550001111"));
 
         assertEquals(original, reloaded);
         assertEquals(original.hashCode(), reloaded.hashCode());
 
-        Contact other = Contact.create("Daniel Castilho", new PhoneNumber("6477052644"));
+        Contact other = Contact.create("Daniel Castilho", new PhoneNumber("+16477052644"));
         assertNotEquals(original, other);
     }
 
