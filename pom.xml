@@ -89,9 +89,20 @@
                     <artifactId>dependency-check-maven</artifactId>
                     <version>12.1.9</version>
                     <configuration>
-                        <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                        <!-- Free key: https://nvd.nist.gov/developers/request-an-api-key
+                             Without it the NVD throttles updates into hours-long
+                             full-mirror downloads on every cold cache. -->
+                        <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+                        <!-- Persistent local mirror: the first completed run seeds
+                             it, every later run only applies NVD deltas. Lives
+                             outside the repo so all projects share one mirror. -->
+                        <dataDirectory>${user.home}/.m2/dependency-check-data</dataDirectory>
+                        <!-- Report-only policy (same as the deprecated
+                             failBuildOnAnyVulnerability=false): CVSS >= 11 is
+                             unreachable, so findings never break the build. -->
+                        <failBuildOnCVSS>11</failBuildOnCVSS>
                         <suppressionFiles>
-                            <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
+                            <suppressionFile>${maven.multiModuleProjectDirectory}/dependency-check-suppressions.xml</suppressionFile>
                         </suppressionFiles>
                     </configuration>
                 </plugin>

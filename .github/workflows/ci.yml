@@ -41,9 +41,23 @@ jobs:
         if: success()
         run: ./mvnw spotbugs:check
 
+      # Seeds/persists the NVD mirror so Dependency Check applies deltas
+      # instead of re-downloading ~380k records on every run. Bump the key
+      # suffix to force a full refresh.
+      - name: Cache OWASP Dependency Check NVD mirror
+        if: success()
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/dependency-check-data
+          key: dependency-check-nvd-v1
+
       - name: OWASP Dependency Check
         if: success()
-        run: ./mvnw dependency-check:check -DfailBuildOnAnyVulnerability=false
+        env:
+          # Repository secret — without a key the NVD throttles updates into
+          # hours-long full downloads.
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: ./mvnw dependency-check:check
 
       - name: Integration tests (Docker / Testcontainers)
         if: success()
