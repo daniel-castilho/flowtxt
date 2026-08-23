@@ -1,7 +1,7 @@
 # Testing Playbook
 
 **Role:** Write and interpret tests for this Java 21 multi-module Clean Architecture service
-(Spring Boot 3.5, PostgreSQL, Redis, Twilio).
+(Spring Boot 4.1, PostgreSQL, Redis, Twilio).
 **Stack constraints:** JUnit 5 + Mockito for unit tests; Testcontainers (PostgreSQL, Redis) for
 integration tests. No other test deps without human approval.
 

@@ -55,7 +55,7 @@ a multi-module reactor.
 
 ## Testcontainers `disabledWithoutDocker = true` makes ITs portable (2026-08-21)
 
-Integration tests (`*IT`) boot real Mongo + Redis containers. On machines without Docker they
+Integration tests (`*IT`) boot real PostgreSQL + Redis containers. On machines without Docker they
 are **skipped** (not failed), and in CI (which has Docker) they run for real.
 
 **Rule:** annotate integration base classes with
