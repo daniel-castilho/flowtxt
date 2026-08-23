@@ -222,13 +222,13 @@ Rollback = re-run against the previous immutable tag. The Maven version stays
   (first `X-Forwarded-For` hop, else remote address); beyond `rate-limit.limit` requests get
   `429` + `Retry-After`. Atomic Lua script (no orphan keys), shared across replicas, fails open
   (with a WARN log) if Redis is unavailable. Configurable via `RATE_LIMIT_*` env vars.
-- Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
-  `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route authorization for
-  Twilio callbacks still pending (see AGENTS debt).
-- Quality gates green locally: unit tests, SpotBugs (all modules), JaCoCo ≥ 0.40 per module
-  (actual: domain 94.6%, application 88.2%, infrastructure 52.5%, api 45.5%), full CI/CD and
-  governance docs.
-- 60 unit tests + 6 integration tests; Maven wrapper; Dockerfile (non-root); Redis in compose.
+ - Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
+   `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route is permitAll behind the
+   fail-closed `X-Twilio-Signature` validation filter (explicit SecurityConfig rule).
+- Quality gates green: unit tests, SpotBugs (all modules), JaCoCo ≥ 0.40 per module
+  (actual line coverage: domain 87.6%, application 100%, infrastructure 57.4%, api 95.9%),
+  full CI/CD and governance docs.
+- 106 unit tests + 12 integration tests; Maven wrapper; Dockerfile (non-root); Redis in compose.
 - Sources are 100% English (identifiers, comments, logs); legacy Portuguese comments removed.
 
 ## Roadmap
