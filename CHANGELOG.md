@@ -13,6 +13,9 @@ All notable changes to this project are documented in this file. The format is b
   projects hitting the same GitHub Actions failures can apply them directly.
 
 ### Changed
+- **CI actions on supported runtimes**: `actions/cache` bumped v4 → v6 (v4 still declared
+  `node20`, which runners now force-upgrade to Node 24 and flag as deprecated; v6 ships
+  `node24` natively). All other pinned actions were verified to already declare `node24`.
 - **Repository hygiene after the excellence merge**: removed the obsolete "AuthController injects
   infrastructure `JwtService`" item from AGENTS.md Known Technical Debt (the coupling is gone —
   auth flows through the `AuthenticationTokenPort` application port and use cases return
