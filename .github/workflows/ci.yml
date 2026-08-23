@@ -37,9 +37,12 @@ jobs:
       # Direct plugin goals (jacoco/spotbugs/dependency-check) resolve
       # cross-module artifacts from the local repository, not the reactor,
       # so a fresh runner needs an install pass before they can run.
+      # jacoco.skip keeps this preparatory pass from re-running the
+      # lifecycle-bound report/check against skipped tests; coverage is
+      # enforced by the dedicated check step below.
       - name: Install reactor artifacts
         if: success()
-        run: ./mvnw -B install -DskipTests
+        run: ./mvnw -B install -DskipTests -Djacoco.skip=true
 
       - name: JaCoCo coverage check
         if: success()
@@ -51,13 +54,14 @@ jobs:
 
       # Seeds/persists the NVD mirror so Dependency Check applies deltas
       # instead of re-downloading ~380k records on every run. Bump the key
-      # suffix to force a full refresh.
+      # suffix to force a full refresh (last bump: dependency-check 12.2.2
+      # fixed the NVD URL-column overflow that corrupted v1 caches).
       - name: Cache OWASP Dependency Check NVD mirror
         if: success()
         uses: actions/cache@v4
         with:
           path: ~/.m2/dependency-check-data
-          key: dependency-check-nvd-v1
+          key: dependency-check-nvd-v2
 
       - name: OWASP Dependency Check
         if: success()
