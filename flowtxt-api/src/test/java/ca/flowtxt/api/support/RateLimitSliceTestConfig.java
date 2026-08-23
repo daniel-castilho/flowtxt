@@ -2,6 +2,8 @@ package ca.flowtxt.api.support;
 
 import ca.flowtxt.infrastructure.config.properties.RateLimitProperties;
 import ca.flowtxt.infrastructure.config.properties.TwilioProperties;
+import ca.flowtxt.infrastructure.security.RestAccessDeniedHandler;
+import ca.flowtxt.infrastructure.security.RestAuthenticationEntryPoint;
 import ca.flowtxt.infrastructure.security.filter.RateLimitFilter;
 import ca.flowtxt.infrastructure.security.handler.RestErrorResponseWriter;
 import ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter;
@@ -54,5 +56,17 @@ public class RateLimitSliceTestConfig {
             FixedWindowRateLimiter rateLimiter,
             RestErrorResponseWriter errorResponseWriter) {
         return new RateLimitFilter(properties, rateLimiter, errorResponseWriter);
+    }
+
+    @Bean
+    public RestAuthenticationEntryPoint restAuthenticationEntryPoint(
+            RestErrorResponseWriter errorResponseWriter) {
+        return new RestAuthenticationEntryPoint(errorResponseWriter);
+    }
+
+    @Bean
+    public RestAccessDeniedHandler restAccessDeniedHandler(
+            RestErrorResponseWriter errorResponseWriter) {
+        return new RestAccessDeniedHandler(errorResponseWriter);
     }
 }

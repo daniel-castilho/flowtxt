@@ -1,6 +1,6 @@
 # AGENTS.md
 
-FlowTXT — an SMS delivery backend built with **Java 21 + Spring Boot 3.5** as a strict
+FlowTXT — an SMS delivery backend built with **Java 21 + Spring Boot 4.1** as a strict
 **Clean Architecture** (layered, multi-module) service. The business core (`flowtxt-domain` +
 `flowtxt-application`) is kept independent of `infrastructure` details: persistence (PostgreSQL via Spring Data JPA + Flyway),
 cache (Redis), SMS delivery (Twilio / fake for dev) and the web layer (Spring Web controllers)

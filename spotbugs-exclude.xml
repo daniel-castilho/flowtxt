@@ -23,4 +23,45 @@
         <Class name="ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+    <!--
+      Security collaborators (entry point, access-denied handler, signature
+      and rate-limit filters, error writer) store Spring-injected singletons
+      (RestErrorResponseWriter, ObjectMapper). Defensive copying is
+      meaningless for stateless framework beans; sharing the reference is
+      the intended contract.
+    -->
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.security.RestAccessDeniedHandler"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.security.RestAuthenticationEntryPoint"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.security.TwilioSignatureValidationFilter"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.security.filter.RateLimitFilter"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.security.handler.RestErrorResponseWriter"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <!--
+      ErrorResponse is an outbound response DTO serialized to JSON exactly
+      once per request. Its record component carries a map built by the
+      exception handler from Bean Validation violations and is never mutated
+      or retained after serialization.
+    -->
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.web.dto.response.ErrorResponse"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="ca.flowtxt.infrastructure.web.dto.response.ErrorResponse"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>

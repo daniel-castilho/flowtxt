@@ -1,6 +1,6 @@
 package ca.flowtxt.infrastructure.web.dto.response;
 
-import tools.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.Instant;
 import java.util.Map;

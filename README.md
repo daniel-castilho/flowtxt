@@ -8,7 +8,7 @@
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
-FlowTXT is an **SMS delivery backend** built with **Java 21**, **Spring Boot 3.5** and a strict
+FlowTXT is an **SMS delivery backend** built with **Java 21**, **Spring Boot 4.1** and a strict
 **Clean Architecture** (multi-module: domain / application / infrastructure / api). It manages
 contacts, sends SMS through **Twilio** (with a fake adapter for dev/test), tracks delivery
 status in **PostgreSQL** (schema owned by Flyway), uses **Redis** for caching, and secures every endpoint with **JWT**

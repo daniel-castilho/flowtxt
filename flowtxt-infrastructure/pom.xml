@@ -42,16 +42,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Jackson 3 (tools.jackson.*) for ErrorResponse /
-             RestErrorResponseWriter used by the security filters/handlers.
-             Spring Boot 4 manages these tools.jackson.* artifacts via the
-             spring-boot-dependencies BOM. -->
+        <!-- Jackson 3 for ErrorResponse / RestErrorResponseWriter used by
+             the security filters/handlers. Spring Boot 4 manages them via
+             the spring-boot-dependencies BOM: databind/core live under the
+             tools.jackson.core groupId, while jackson-annotations stays on
+             its legacy com.fasterxml.jackson.core coordinates (2.x line). -->
         <dependency>
-            <groupId>tools.jackson</groupId>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>tools.jackson</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 

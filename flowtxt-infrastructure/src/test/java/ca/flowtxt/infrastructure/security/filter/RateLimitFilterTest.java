@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -76,7 +77,6 @@ class RateLimitFilterTest {
 
         filter.doFilter(request, response, filterChain);
 
-        verify(response).setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         verify(response).setHeader("Retry-After", "42");
         verify(errorResponseWriter).write(
                 eq(request),

@@ -112,6 +112,18 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Required at runtime by TestRestTemplate / its auto-configuration
+             (RestTemplateBuilder lives here since Boot 4). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <exclusions>
@@ -194,6 +206,14 @@
                 </executions>
                 <configuration>
                     <argLine>@{argLine}</argLine>
+                    <!-- The module's own classes must be visible UNPACKED:
+                         after `package`, the main artifact is the Spring
+                         Boot fat jar (BOOT-INF layout), which hides
+                         ca/flowtxt/*.class from @SpringBootConfiguration
+                         discovery and classpath scanning in the ITs. -->
+                    <additionalClasspathElements>
+                        <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
+                    </additionalClasspathElements>
                 </configuration>
             </plugin>
 

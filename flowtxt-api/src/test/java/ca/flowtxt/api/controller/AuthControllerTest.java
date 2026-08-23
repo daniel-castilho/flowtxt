@@ -9,6 +9,7 @@ import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
 import ca.flowtxt.infrastructure.config.SecurityConfig;
 import ca.flowtxt.infrastructure.security.JwtAuthenticationFilter;
+import ca.flowtxt.infrastructure.security.JwtService;
 import ca.flowtxt.infrastructure.web.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private UserDetailsService userDetailsService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     private AuthResult authResult(String email) {
         User user = new User(

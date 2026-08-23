@@ -7,6 +7,30 @@ All notable changes to this project are documented in this file. The format is b
 ## [Unreleased]
 
 ### Fixed
+- **The reactor could not even read its POMs**: commit `a40fbd1` declared Jackson 3 under the
+  non-existent `tools.jackson:jackson-annotations` / `tools.jackson:jackson-databind`
+  coordinates; the Boot 4 BOM manages `tools.jackson.core:jackson-databind` while
+  `jackson-annotations` stays on its legacy `com.fasterxml.jackson.core` coordinates (2.x line).
+  Coordinates corrected and the misleading comment replaced. Because the broken POM masked the
+  compiler, four further Boot 4 migration breakages surfaced one after another: the actuator
+  health API moved to `org.springframework.boot.health.contributor` (`spring-boot-health`
+  module, already transitive via `spring-boot-starter-actuator`);
+  `TestRestTemplate` moved to the new Boot 4 `spring-boot-resttestclient` module (added as a
+  test-scoped, BOM-managed dependency of flowtxt-api — explicitly approved);
+  `RateLimitFilterTest` still asserted a direct `setStatus(429)` that the filter delegated to
+  `RestErrorResponseWriter` back in `603a3e9` (assertion updated, 429 coverage kept via the
+  writer verification); and the controller slice lacked beans for
+  `RestAuthenticationEntryPoint`/`RestAccessDeniedHandler`, now wired in
+  `RateLimitSliceTestConfig`.
+- **Integration tests never ran under Boot 4** (masked by the broken POM since `a40fbd1`):
+  Failsafe put the module's Spring Boot fat jar on the test classpath instead of the unpacked
+  `target/classes`, hiding `ca/flowtxt/*.class` from `@SpringBootConfiguration` discovery
+  (`Unable to find a @SpringBootConfiguration`) — the failsafe configuration now adds
+  `${project.build.outputDirectory}` as an extra classpath element. `TestRestTemplate`
+  additionally required `@AutoConfigureTestRestTemplate` on the base test class plus the
+  BOM-managed, test-scoped `spring-boot-restclient` module (`RestTemplateBuilder` moved there
+  in Boot 4) — both approved additions. Full `./mvnw verify` (unit + Testcontainers ITs +
+  JaCoCo check) is green again; README/AGENTS prose corrected from "Boot 3.5" to "Boot 4.1".
 - **Optimistic locking was defeated on every message update past the first**: the immutable
   domain `Message` cannot carry JPA's `@Version`, and `JpaMessageRepositoryAdapter` remapped it
   onto a fresh entity per save, resetting the version to 0. The first status write passed by
