@@ -54,3 +54,6 @@ twilio.env
 deploy/.env
 deploy/.env.*
 !deploy/.env.example
+
+# Local tool caches (e.g. Trivy DBs from local scans)
+.cache/
