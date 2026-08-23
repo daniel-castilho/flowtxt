@@ -111,14 +111,15 @@ jobs:
           fi
           echo "OK: image runs as non-root ($out)"
 
-      - name: Trivy vulnerability scan
+      # Report pass: full SARIF for the Security tab advisory trail. In sarif
+      # mode trivy-action ignores the severity filter for both output AND
+      # exit-code (aquasecurity/trivy-action#309), so this step must not gate.
+      - name: Trivy vulnerability report (all severities)
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ${{ env.IMAGE }}
           format: sarif
           output: trivy-results.sarif
-          severity: HIGH,CRITICAL
-          exit-code: '1'
           ignore-unfixed: true
 
       - name: Upload Trivy results to GitHub Security
@@ -126,6 +127,18 @@ jobs:
         if: always()
         with:
           sarif_file: trivy-results.sarif
+
+      # Gate pass: table format respects the severity filter, so exit-code '1'
+      # fires only on fixable HIGH/CRITICAL findings — the actual policy.
+      # Reuses the Trivy cache downloaded by the report pass above.
+      - name: Trivy vulnerability gate (HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
 
       - name: Generate SBOM
         uses: aquasecurity/trivy-action@0.35.0

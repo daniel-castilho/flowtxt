@@ -18,6 +18,21 @@ All notable changes to this project are documented in this file. The format is b
   described the Testcontainers stack as Mongo instead of PostgreSQL).
 
 ### Fixed
+- **CI red on `main` for two independent reasons**:
+  - The Trivy image scan failed on fixable MEDIUM CVEs although the policy is
+    HIGH/CRITICAL — with `format: sarif`, trivy-action ignores the `severity`
+    filter for both the report and the exit code
+    ([aquasecurity/trivy-action#309](https://github.com/aquasecurity/trivy-action/issues/309)).
+    The pipeline now runs a non-blocking full-SARIF pass (Security-tab advisory
+    trail, unchanged) plus a separate table-format gate whose exit code only
+    fires on fixable HIGH/CRITICAL findings.
+  - The OWASP Dependency Check build gate broke whenever the NVD API answered
+    429/503 (ongoing instability since its June 2026 schema migration), aborting
+    mid-update and sometimes corrupting the cached H2 mirror. The plugin now
+    sets `failOnError=false` so an unreachable NVD degrades to scanning against
+    the cached mirror instead of failing CI; vulnerability reporting stays
+    fail-soft by design (`failBuildOnCVSS=11`) and the image remains gated hard
+    by Trivy.
 - **The reactor could not even read its POMs**: commit `a40fbd1` declared Jackson 3 under the
   non-existent `tools.jackson:jackson-annotations` / `tools.jackson:jackson-databind`
   coordinates; the Boot 4 BOM manages `tools.jackson.core:jackson-databind` while

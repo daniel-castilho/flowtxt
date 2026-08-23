@@ -117,6 +117,13 @@
                              failBuildOnAnyVulnerability=false): CVSS >= 11 is
                              unreachable, so findings never break the build. -->
                         <failBuildOnCVSS>11</failBuildOnCVSS>
+                        <!-- NVD resilience: the API periodically answers
+                             429/503 under load (its June 2026 schema migration
+                             re-touched ~95% of all records), and an aborted
+                             update must degrade to "scan against the cached
+                             mirror" instead of breaking CI. Image-level CVEs
+                             are still gated hard by Trivy in the pipeline. -->
+                        <failOnError>false</failOnError>
                         <suppressionFiles>
                             <suppressionFile>${maven.multiModuleProjectDirectory}/dependency-check-suppressions.xml</suppressionFile>
                         </suppressionFiles>
