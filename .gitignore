@@ -48,6 +48,7 @@ twilio.env
 
 # local backup artifacts
 *.bak.*
+.excellence-backup*/
 
 # Production operator contract (secrets); keep the example tracked.
 deploy/.env
