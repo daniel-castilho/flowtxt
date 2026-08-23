@@ -111,6 +111,20 @@ jobs:
           fi
           echo "OK: image runs as non-root ($out)"
 
+      # trivy-action's built-in cache wraps an old node20-pinned
+      # actions/cache; keep the same daily-seeded behavior with our own
+      # supported runtime instead (first run of the day seeds the DBs,
+      # later runs restore them).
+      - name: Compute Trivy cache day
+        id: trivy-day
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Trivy vulnerability databases
+        uses: actions/cache@v6
+        with:
+          path: .cache/trivy
+          key: trivy-db-${{ steps.trivy-day.outputs.day }}
+
       # Report pass: full SARIF for the Security tab advisory trail. In sarif
       # mode trivy-action ignores the severity filter for both output AND
       # exit-code (aquasecurity/trivy-action#309), so this step must not gate.
@@ -121,6 +135,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           ignore-unfixed: true
+          cache: false
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
@@ -139,6 +154,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: HIGH,CRITICAL
+          cache: false
 
       - name: Generate SBOM
         uses: aquasecurity/trivy-action@0.35.0
@@ -146,6 +162,7 @@ jobs:
           image-ref: ${{ env.IMAGE }}
           format: cyclonedx
           output: sbom.cdx.json
+          cache: false
 
       - name: Upload SBOM + image digest
         uses: actions/upload-artifact@v7

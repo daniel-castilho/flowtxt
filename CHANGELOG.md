@@ -15,7 +15,11 @@ All notable changes to this project are documented in this file. The format is b
 ### Changed
 - **CI actions on supported runtimes**: `actions/cache` bumped v4 → v6 (v4 still declared
   `node20`, which runners now force-upgrade to Node 24 and flag as deprecated; v6 ships
-  `node24` natively). All other pinned actions were verified to already declare `node24`.
+  `node24` natively). The Trivy steps no longer rely on trivy-action's built-in caching
+  (it pins an old node20-pinned `actions/cache` internally) — the vulnerability DBs are
+  cached by our own `actions/cache@v6` step on the same daily-seeded key scheme over
+  `.cache/trivy`, with `cache: false` on each trivy invocation. All other pinned actions
+  were verified to already declare `node24`.
 - **Repository hygiene after the excellence merge**: removed the obsolete "AuthController injects
   infrastructure `JwtService`" item from AGENTS.md Known Technical Debt (the coupling is gone —
   auth flows through the `AuthenticationTokenPort` application port and use cases return
