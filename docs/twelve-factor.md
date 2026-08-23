@@ -19,10 +19,10 @@ horizontal scaling.
 | 6 | Processes | ✅ Stateless | JWT stateless auth; no in-memory session state across requests. Cross-process state (cache, login rate limiting) lives in Redis. |
 | 7 | Port binding | ✅ Self-contained | App exposes HTTP on `server.port` (8080) via Spring Boot; no external web server injected. |
 | 8 | Concurrency | ✅ Process-based | Scales by spawning processes; each is a copy of the same stateless app. |
-| 9 | Disposability | ✅ Fast boot/shutdown | Spring Boot boots quickly; graceful shutdown on SIGTERM. |
-| 10 | Dev/prod parity | ✅ Containers | `docker compose` (PostgreSQL + Redis) keeps local close to prod. |
-| 11 | Logs | ✅ Mostly | Output goes to stdout (Spring Boot + `console`). No app writes log files. Never log secrets (Twilio token masked). |
-| 12 | Admin processes | ✅ Compliant | One-off tasks run as separate processes from `scripts/` (seed data, psql shell, smoke test) against the same codebase, env-var config and backing services. Flyway owns schema changes. |
+| 9 | Disposability | ✅ Fast boot/graceful shutdown | `server.shutdown=graceful` with a 30s `timeout-per-shutdown-phase` drains in-flight requests on SIGTERM; liveness/readiness probes gate the load balancer. |
+| 10 | Dev/prod parity | ✅ Containers | `docker compose` (PostgreSQL + Redis) keeps local close to prod; the same jar and image run in all environments. |
+| 11 | Logs | ✅ Compliant | Logs are event streams to stdout. The `prod` profile emits structured JSON via Spring Boot 4's built-in ECS formatter (one object per line, root-cause first, shortened stack traces) with no extra dependency. No app writes log files. Never log secrets (Twilio token masked). |
+| 12 | Admin processes | ✅ Compliant | One-off tasks run as separate processes from `scripts/` (seed data, psql shell, smoke test, deploy/rollback, shutdown-under-load) against the same codebase, env-var config and backing services. Flyway owns schema changes. |
 
 Legend: ✅ compliant · ⚠️ partially compliant / has an open TODO.
 

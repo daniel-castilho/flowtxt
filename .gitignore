@@ -48,3 +48,8 @@ twilio.env
 
 # local backup artifacts
 *.bak.*
+
+# Production operator contract (secrets); keep the example tracked.
+deploy/.env
+deploy/.env.*
+!deploy/.env.example

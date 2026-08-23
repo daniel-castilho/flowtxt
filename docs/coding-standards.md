@@ -84,8 +84,12 @@ flowtxt-api/src/main/java/ca/flowtxt/api/
 ## 5. Errors & logging
 
 - Never empty `catch`. Log with context (ids, operation), not only `"error occurred"`.
-- Domain/application throw `IllegalArgumentException` with a clear message; the API layer maps
-  exceptions to HTTP responses via `GlobalExceptionHandler`.
+- Throw **typed domain exceptions** for semantic failures (in `domain/common`):
+  `NotFoundException` -> 404, `ConflictException` -> 409, `ForbiddenException` -> 403,
+  `InvalidCredentialsException` -> 401. Reserve `IllegalArgumentException` for invalid
+  arguments/preconditions (400) and `IllegalStateException` for lifecycle conflicts (409).
+  `GlobalExceptionHandler` (in infrastructure) maps all of them to the canonical
+  `ErrorResponse` envelope; every error path uses `RestErrorResponseWriter`.
 - Never log passwords, tokens, or full auth payloads. The Twilio adapter masks the auth token.
 - Log levels: `error` — needs attention · `warn` — handled anomaly · `info` — lifecycle ·
   `debug` — diagnostics.
@@ -110,7 +114,7 @@ flowtxt-api/src/main/java/ca/flowtxt/api/
 | Integration | JUnit 5 + Testcontainers (`*IT`) | PostgreSQL + Redis containers, real adapters, security flow |
 
 - Names: `method_condition_expectedResult` or descriptive `shouldXWhenY`.
-- Fast loop: `./mvnw test` (no Docker). Integration: `./mvnw test -Dtest='*IT' -Dsurefire.failIfNoSpecifiedTests=false`.
+- Fast loop: `./mvnw test` (no Docker). Full gate (unit + Failsafe `*IT`): `./mvnw verify` (needs Docker).
 - Full guidance: `docs/testing-playbook.md`.
 
 ## 8. Documentation

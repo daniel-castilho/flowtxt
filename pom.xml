@@ -19,6 +19,9 @@
         <java.version>21</java.version>
         <spring.boot.version>4.1.0</spring.boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Set to true to skip Surefire (unit tests) while still running
+             Failsafe integration tests via `./mvnw verify -Dskip.unit.tests=true`. -->
+        <skip.unit.tests>false</skip.unit.tests>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +71,11 @@
                                         <value>COVEREDRATIO</value>
                                         <minimum>0.40</minimum>
                                     </limit>
+                                    <limit>
+                                        <counter>BRANCH</counter>
+                                        <value>COVEREDRATIO</value>
+                                        <minimum>0.30</minimum>
+                                    </limit>
                                 </limits>
                             </rule>
                         </rules>
@@ -109,7 +117,7 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <!-- JaCoCo: attach the agent during tests and write the report on verify -->
+            <!-- JaCoCo: attach the agent during tests and write the report/check on verify -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -124,6 +132,13 @@
                         <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

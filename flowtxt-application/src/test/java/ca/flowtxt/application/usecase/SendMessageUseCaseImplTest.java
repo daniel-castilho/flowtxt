@@ -3,6 +3,7 @@ package ca.flowtxt.application.usecase;
 import ca.flowtxt.application.port.out.ContactRepository;
 import ca.flowtxt.application.port.out.MessageRepository;
 import ca.flowtxt.application.port.out.SmsService;
+import ca.flowtxt.domain.common.NotFoundException;
 import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.Message;
 import ca.flowtxt.domain.model.MessageStatus;
@@ -77,10 +78,10 @@ class SendMessageUseCaseImplTest {
     }
 
     @Test
-    void shouldRejectANonRegisteredContact() {
+    void shouldRejectANonRegisteredContactAsNotFound() {
         when(contactRepository.findByPhoneNumber(TO)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NotFoundException.class,
                 () -> sendMessageUseCase.execute(FROM, TO, CONTENT));
 
         verify(messageRepository, times(0)).save(any());

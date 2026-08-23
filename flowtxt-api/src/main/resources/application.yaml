@@ -12,9 +12,8 @@ spring:
   profiles:
     active: dev
 
-  # Twelve-Factor config: the JDBC URL comes from the DATABASE_URL env var
-  # (default = the local docker-compose Postgres 16). No schema auto-ddl —
-  # Flyway owns the schema.
+  # Twelve-Factor config: the JDBC URL comes from DATABASE_URL (default =
+  # local docker-compose Postgres 16). No schema auto-ddl — Flyway owns it.
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/flowtxt}
     username: ${DB_USERNAME:flowtxt}
@@ -29,7 +28,6 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
-  # Boot 3 renamed Redis properties under spring.data.redis
   data:
     redis:
       host: localhost
@@ -39,8 +37,14 @@ spring:
     serialization:
       INDENT_OUTPUT: true
 
+  # Twelve-Factor factor 9 (disposability): on SIGTERM, stop accepting new
+  # requests and give in-flight work up to 30s to finish before exiting.
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
 server:
   port: 8080
+  shutdown: graceful
 
 # JWT — the secret is a DEV-ONLY placeholder. Production MUST override it via
 # the JWT_SECRET environment variable (e.g. `openssl rand -base64 48`).
@@ -55,8 +59,8 @@ twilio:
   auth-token: ${TWILIO_AUTH_TOKEN:}
   phone-number: ${TWILIO_PHONE_NUMBER:}
 
-# Login throttling: fixed-window counter per client IP in Redis (shared
-# across replicas). Dev defaults below; production overrides via RATE_LIMIT_*.
+# Login throttling: fixed-window counter per client IP in Redis (shared across
+# replicas). Dev defaults below; production overrides via RATE_LIMIT_*.
 rate-limit:
   enabled: ${RATE_LIMIT_ENABLED:true}
   limit: ${RATE_LIMIT_LIMIT:20}
@@ -86,3 +90,12 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
+      # Liveness = only the process is alive (Spring's livenessState).
+      # Readiness = the service can serve traffic: it must be able to talk
+      # to PostgreSQL (custom `postgres` indicator + auto-configured `db`)
+      # and Redis (auto-configured `redis`).
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,postgres,db,redis

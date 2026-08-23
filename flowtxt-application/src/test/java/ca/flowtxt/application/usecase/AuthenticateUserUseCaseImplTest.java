@@ -1,6 +1,9 @@
 package ca.flowtxt.application.usecase;
 
+import ca.flowtxt.application.port.in.AuthResult;
+import ca.flowtxt.application.port.out.AuthenticationTokenPort;
 import ca.flowtxt.application.port.out.UserRepository;
+import ca.flowtxt.domain.common.InvalidCredentialsException;
 import ca.flowtxt.domain.model.PasswordHasher;
 import ca.flowtxt.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +16,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,39 +30,48 @@ class AuthenticateUserUseCaseImplTest {
     @Mock
     private PasswordHasher passwordHasher;
 
+    @Mock
+    private AuthenticationTokenPort authenticationTokenPort;
+
     private AuthenticateUserUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new AuthenticateUserUseCaseImpl(userRepository, passwordHasher);
+        useCase = new AuthenticateUserUseCaseImpl(
+                userRepository, passwordHasher, authenticationTokenPort);
     }
 
     @Test
-    void authenticatesWithValidCredentials() {
+    void authenticatesWithValidCredentialsAndIssuesToken() {
         User stored = User.register("user@example.com", "hashed-value");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(stored));
         when(passwordHasher.matches("correct-password", "hashed-value")).thenReturn(true);
+        when(authenticationTokenPort.issueToken(stored)).thenReturn("jwt-token");
 
-        User result = useCase.authenticate("User@Example.COM", "correct-password");
+        AuthResult result = useCase.authenticate("User@Example.COM", "correct-password");
 
-        assertEquals(stored, result);
+        assertEquals(stored, result.user());
+        assertEquals("jwt-token", result.token());
+        verify(authenticationTokenPort).issueToken(stored);
     }
 
     @Test
-    void rejectsUnknownEmail() {
+    void rejectsUnknownEmailWithInvalidCredentials() {
         when(userRepository.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(InvalidCredentialsException.class,
                 () -> useCase.authenticate("ghost@example.com", "whatever123"));
+        verify(authenticationTokenPort, never()).issueToken(any());
     }
 
     @Test
-    void rejectsWrongPassword() {
+    void rejectsWrongPasswordWithInvalidCredentials() {
         User stored = User.register("user@example.com", "hashed-value");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(stored));
         when(passwordHasher.matches("wrong-password", "hashed-value")).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(InvalidCredentialsException.class,
                 () -> useCase.authenticate("user@example.com", "wrong-password"));
+        verify(authenticationTokenPort, never()).issueToken(any());
     }
 }

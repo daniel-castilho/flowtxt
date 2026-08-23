@@ -2,6 +2,7 @@ package ca.flowtxt.application.usecase;
 
 import ca.flowtxt.application.port.in.RegisterContactUseCase;
 import ca.flowtxt.application.port.out.ContactRepository;
+import ca.flowtxt.domain.common.ConflictException;
 import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.PhoneNumber;
 
@@ -16,7 +17,7 @@ public class RegisterContactUseCaseImpl implements RegisterContactUseCase {
     @Override
     public Contact execute(final String name, final String phoneNumber) {
         contactRepository.findByPhoneNumber(phoneNumber).ifPresent(existing -> {
-            throw new IllegalStateException(
+            throw new ConflictException(
                     "Contact with phone number " + phoneNumber + " already exists");
         });
 

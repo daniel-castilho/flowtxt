@@ -78,7 +78,9 @@ class SecurityFlowIT extends AbstractIntegrationTest {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"another-user@example.com\",\"password\":\"wrong-password\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Invalid credentials"));
     }
 
     @Test

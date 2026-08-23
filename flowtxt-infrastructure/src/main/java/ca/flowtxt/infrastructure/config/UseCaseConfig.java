@@ -5,6 +5,7 @@ import ca.flowtxt.application.port.in.RegisterContactUseCase;
 import ca.flowtxt.application.port.in.RegisterUserUseCase;
 import ca.flowtxt.application.port.in.SendMessageUseCase;
 import ca.flowtxt.application.port.in.UpdateMessageStatusUseCase;
+import ca.flowtxt.application.port.out.AuthenticationTokenPort;
 import ca.flowtxt.application.port.out.ContactRepository;
 import ca.flowtxt.application.port.out.MessageRepository;
 import ca.flowtxt.application.port.out.SmsService;
@@ -42,14 +43,16 @@ public class UseCaseConfig {
     @Bean
     public RegisterUserUseCase registerUserUseCase(
             final UserRepository userRepository,
-            final PasswordHasher passwordHasher) {
-        return new RegisterUserUseCaseImpl(userRepository, passwordHasher);
+            final PasswordHasher passwordHasher,
+            final AuthenticationTokenPort authenticationTokenPort) {
+        return new RegisterUserUseCaseImpl(userRepository, passwordHasher, authenticationTokenPort);
     }
 
     @Bean
     public AuthenticateUserUseCase authenticateUserUseCase(
             final UserRepository userRepository,
-            final PasswordHasher passwordHasher) {
-        return new AuthenticateUserUseCaseImpl(userRepository, passwordHasher);
+            final PasswordHasher passwordHasher,
+            final AuthenticationTokenPort authenticationTokenPort) {
+        return new AuthenticateUserUseCaseImpl(userRepository, passwordHasher, authenticationTokenPort);
     }
 }

@@ -2,6 +2,7 @@ package ca.flowtxt.application.usecase;
 
 import ca.flowtxt.application.port.in.RegisterContactUseCase;
 import ca.flowtxt.application.port.out.ContactRepository;
+import ca.flowtxt.domain.common.ConflictException;
 import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.PhoneNumber;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ class RegisterContactUseCaseImplTest {
     @Mock
     private ContactRepository contactRepository;
 
-    private RegisterContactUseCaseImpl useCase;
+    private RegisterContactUseCase useCase;
 
     @BeforeEach
     void setUp() {
@@ -43,11 +44,11 @@ class RegisterContactUseCaseImplTest {
     }
 
     @Test
-    void rejectsADuplicatePhoneNumberAsAStateConflict() {
+    void rejectsADuplicatePhoneNumberAsAConflict() {
         when(contactRepository.findByPhoneNumber("+5511999999999"))
                 .thenReturn(Optional.of(Contact.create("Existing", new PhoneNumber("+5511999999999"))));
 
-        assertThrows(IllegalStateException.class,
+        assertThrows(ConflictException.class,
                 () -> useCase.execute("Another Name", "+5511999999999"));
 
         verify(contactRepository, never()).save(any(Contact.class));

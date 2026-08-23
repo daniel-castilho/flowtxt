@@ -1,12 +1,12 @@
 package ca.flowtxt.application.port.in;
 
-import ca.flowtxt.domain.model.User;
-
 /**
- * Registers a new application user. Throws IllegalArgumentException when the
- * email is already registered or the password is too weak.
+ * Registers a new application user and issues a bearer token for the new
+ * account. Throws {@link IllegalArgumentException} when the password is too
+ * weak and {@link ca.flowtxt.domain.common.ConflictException} when the email is
+ * already registered.
  */
 public interface RegisterUserUseCase {
 
-    User register(String email, String rawPassword);
+    AuthResult register(String email, String rawPassword);
 }

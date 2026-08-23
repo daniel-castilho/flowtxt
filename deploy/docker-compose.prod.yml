@@ -1,0 +1,89 @@
+# Production-shaped local stack for FlowTXT. Mirrors the runtime contract the
+# app expects behind a real load balancer: non-root container, read-only root
+# filesystem, tmpfs /tmp, resource limits, restart policy and a health check
+# against the readiness probe.
+#
+# Usage:
+#   cp deploy/.env.example deploy/.env   # fill in real values
+#   docker compose -f deploy/docker-compose.prod.yml up -d
+#
+# The Postgres/Redis services here are for a self-contained demo/staging
+# target; in production they are managed services and only the `app` service
+# is deployed.
+
+services:
+  app:
+    image: ghcr.io/daniel-castilho/flowtxt-api:${IMAGE_TAG}
+    env_file: .env
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health/readiness"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 768m
+        reservations:
+          cpus: "0.25"
+          memory: 384m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: flowtxt
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d flowtxt"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512m
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128m
+
+volumes:
+  pgdata:

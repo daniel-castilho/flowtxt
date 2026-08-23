@@ -1,6 +1,7 @@
 package ca.flowtxt.application.usecase;
 
 import ca.flowtxt.application.port.out.MessageRepository;
+import ca.flowtxt.domain.common.NotFoundException;
 import ca.flowtxt.domain.model.Message;
 import ca.flowtxt.domain.model.MessageStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,10 +51,10 @@ class UpdateMessageStatusUseCaseImplTest {
     }
 
     @Test
-    void throwsWhenNoMessageMatchesTheSid() {
+    void throwsNotFoundWhenNoMessageMatchesTheSid() {
         when(messageRepository.findBySid("missing")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NotFoundException.class,
                 () -> useCase.updateStatus("missing", MessageStatus.DELIVERED));
     }
 

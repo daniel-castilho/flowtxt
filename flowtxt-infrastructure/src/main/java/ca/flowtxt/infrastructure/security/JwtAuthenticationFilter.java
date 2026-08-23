@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,13 @@ import java.io.IOException;
 /**
  * Reads a Bearer token from the Authorization header, validates it, and
  * populates the Spring Security context with the authenticated user.
+ *
+ * <p>An invalid or missing token does not short-circuit the request here: the
+ * filter simply leaves the security context empty and continues the chain, so
+ * public endpoints remain reachable and protected routes are rejected by the
+ * configured {@link RestAuthenticationEntryPoint} with the canonical 401
+ * envelope. This keeps behaviour stable across public/protected routes while
+ * every rejection still shares one JSON shape.</p>
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,20 +43,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        final String header = request.getHeader("Authorization");
         if (header != null && header.startsWith(BEARER_PREFIX)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            String token = header.substring(BEARER_PREFIX.length());
+            final String token = header.substring(BEARER_PREFIX.length());
             if (jwtService.isValid(token)) {
-                String username = jwtService.extractUsername(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                final String username = jwtService.extractUsername(token);
+                final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                UsernamePasswordAuthenticationToken authentication =
+                final UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(

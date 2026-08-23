@@ -1,0 +1,86 @@
+# Production configuration contract (Twelve-Factor factor 3 — config from
+# the environment).
+#
+# Activate with SPRING_PROFILES_ACTIVE=prod. Every value below MUST come from
+# the environment. There are intentionally no dev defaults: an unresolved
+# ${...} placeholder or a missing required variable makes StartupConfigValidator
+# abort startup with an actionable message rather than silently running against
+# development settings.
+#
+# Never put real values in this file. Secrets live in the deployment
+# environment / secret manager; the JWT secret must be overridden (e.g.
+# `openssl rand -base64 48`).
+
+server:
+  # Behind the production proxy/ALB.
+  forward-headers-strategy: framework
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: ${SERVER_SHUTDOWN_TIMEOUT:30s}
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID}
+  auth-token: ${TWILIO_AUTH_TOKEN}
+  phone-number: ${TWILIO_PHONE_NUMBER}
+
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  limit: ${RATE_LIMIT_LIMIT:20}
+  window: ${RATE_LIMIT_WINDOW:1m}
+  paths: ${RATE_LIMIT_PATHS:/auth/login}
+  client-ip-header: ${RATE_LIMIT_CLIENT_IP_HEADER:X-Forwarded-For}
+
+logging:
+  level:
+    root: INFO
+    ca.flowtxt: INFO
+  # Twelve-Factor factor 11: structured JSON logs to stdout under prod using
+  # Spring Boot 4's built-in ECS JSON formatter (no extra dependency). One
+  # JSON object per line with root-cause-first, shortened stack traces. The
+  # console pattern is disabled so the JSON encoder owns the output.
+  structured:
+    format:
+      console: ${LOG_STRUCTURED_FORMAT:ecs}
+  pattern:
+    console:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,postgres,db,redis

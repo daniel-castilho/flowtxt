@@ -4,6 +4,7 @@ import ca.flowtxt.application.port.in.SendMessageUseCase;
 import ca.flowtxt.application.port.out.ContactRepository;
 import ca.flowtxt.application.port.out.MessageRepository;
 import ca.flowtxt.application.port.out.SmsService;
+import ca.flowtxt.domain.common.NotFoundException;
 import ca.flowtxt.domain.model.Contact;
 import ca.flowtxt.domain.model.Message;
 
@@ -25,7 +26,7 @@ public class SendMessageUseCaseImpl implements SendMessageUseCase {
     @Override
     public void execute(final String from, final String to, final String messageText) {
         var contact = contactRepository.findByPhoneNumber(to)
-                .orElseThrow(() -> new IllegalArgumentException("Contact not found for phone: " + to));
+                .orElseThrow(() -> new NotFoundException("Contact not found for phone: " + to));
 
         var message = Message.pending(contact.getId(), messageText);
         messageRepository.save(message);

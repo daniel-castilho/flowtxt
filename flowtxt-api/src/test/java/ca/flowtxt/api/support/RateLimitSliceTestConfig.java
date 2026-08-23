@@ -3,6 +3,7 @@ package ca.flowtxt.api.support;
 import ca.flowtxt.infrastructure.config.properties.RateLimitProperties;
 import ca.flowtxt.infrastructure.config.properties.TwilioProperties;
 import ca.flowtxt.infrastructure.security.filter.RateLimitFilter;
+import ca.flowtxt.infrastructure.security.handler.RestErrorResponseWriter;
 import ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -43,8 +44,15 @@ public class RateLimitSliceTestConfig {
     }
 
     @Bean
+    public RestErrorResponseWriter restErrorResponseWriter() {
+        return mock(RestErrorResponseWriter.class);
+    }
+
+    @Bean
     public RateLimitFilter rateLimitFilter(
-            RateLimitProperties properties, FixedWindowRateLimiter rateLimiter) {
-        return new RateLimitFilter(properties, rateLimiter);
+            RateLimitProperties properties,
+            FixedWindowRateLimiter rateLimiter,
+            RestErrorResponseWriter errorResponseWriter) {
+        return new RateLimitFilter(properties, rateLimiter, errorResponseWriter);
     }
 }

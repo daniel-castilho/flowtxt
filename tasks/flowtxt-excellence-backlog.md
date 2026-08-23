@@ -4,7 +4,7 @@ Candidate backlog, ordered by value/risk. Status: **open** unless noted.
 
 | # | Item | Why | Status |
 | - | ---- | --- | ------ |
-| 1a | Twilio delivery-status webhook endpoint | Close the message lifecycle | **done** (2026-08-21): controller + `UpdateMessageStatusUseCase` + Mongo update shipped |
+| 1a | Twilio delivery-status webhook endpoint | Close the message lifecycle | **done** (2026-08-21): controller + `UpdateMessageStatusUseCase` + PostgreSQL status update shipped |
 | 1b | Explicit authorization rule + Twilio request-signature validation for `/webhook/twilio/**` | Make the webhook actually usable and tamper-proof | **done** (2026-08-21): permitAll + fail-closed signature filter |
 | 2 | Rate limiting on `/auth/login` (Redis-backed fixed window) | Brute-force protection | **done** (2026-08-21): `RateLimitFilter` + `FixedWindowRateLimiter` (Lua INCR+PEXPIRE+PTTL), 429 + `Retry-After`, fail-open |
 | 3 | `PhoneNumber` full E.164 validation in the domain value object | Domain integrity | **done** (2026-08-21): strict `\+[1-9]\d{1,14}` enforced in the record; DTO pattern aligned |

@@ -161,7 +161,42 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <!-- Unit tests only: *IT run under Failsafe during verify. -->
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                    <!-- Allows the CI integration step to run only Failsafe:
+                         `./mvnw verify -Dskip.unit.tests=true`. @{argLine}
+                         late-binds the JaCoCo agent set by prepare-agent. -->
+                    <skipTests>${skip.unit.tests}</skipTests>
+                    <argLine>@{argLine}</argLine>
+                </configuration>
             </plugin>
+            <!--
+              Failsafe runs the integration tests (*IT) in the
+              integration-test/verify phases, so `./mvnw verify` is one
+              complete local/CI gate. The Docker-backed *IT classes are
+              skipped automatically when Docker is unavailable
+              (@Testcontainers(disabledWithoutDocker = true)).
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>@{argLine}</argLine>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

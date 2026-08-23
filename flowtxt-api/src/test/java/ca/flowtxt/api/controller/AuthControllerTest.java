@@ -1,21 +1,22 @@
 package ca.flowtxt.api.controller;
 
-import ca.flowtxt.api.exception.GlobalExceptionHandler;
 import ca.flowtxt.api.support.RateLimitSliceTestConfig;
+import ca.flowtxt.application.port.in.AuthResult;
 import ca.flowtxt.application.port.in.AuthenticateUserUseCase;
 import ca.flowtxt.application.port.in.RegisterUserUseCase;
+import ca.flowtxt.domain.common.InvalidCredentialsException;
 import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
 import ca.flowtxt.infrastructure.config.SecurityConfig;
 import ca.flowtxt.infrastructure.security.JwtAuthenticationFilter;
-import ca.flowtxt.infrastructure.security.JwtService;
+import ca.flowtxt.infrastructure.web.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -42,18 +43,18 @@ class AuthControllerTest {
     private AuthenticateUserUseCase authenticateUserUseCase;
 
     @MockitoBean
-    private JwtService jwtService;
-
-    @MockitoBean
     private UserDetailsService userDetailsService;
+
+    private AuthResult authResult(String email) {
+        User user = new User(
+                UUID.randomUUID(), email, "stored-hash", Role.USER,
+                java.time.Instant.now());
+        return new AuthResult(user, "jwt-token");
+    }
 
     @Test
     void registerReturnsCreatedWithAToken() throws Exception {
-        User user = new User(
-                UUID.randomUUID(), "user@example.com", "stored-hash", Role.USER,
-                java.time.Instant.now());
-        when(registerUserUseCase.register(any(), any())).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+        when(registerUserUseCase.register(any(), any())).thenReturn(authResult("user@example.com"));
 
         mockMvc.perform(post("/auth/register")
                         .with(csrf())
@@ -67,11 +68,8 @@ class AuthControllerTest {
 
     @Test
     void loginReturnsOkWithAToken() throws Exception {
-        User user = new User(
-                UUID.randomUUID(), "user@example.com", "stored-hash", Role.USER,
-                java.time.Instant.now());
-        when(authenticateUserUseCase.authenticate(any(), any())).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+        when(authenticateUserUseCase.authenticate(any(), any()))
+                .thenReturn(authResult("user@example.com"));
 
         mockMvc.perform(post("/auth/login")
                         .with(csrf())
@@ -87,18 +85,22 @@ class AuthControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"not-an-email\",\"password\":\"strongpass123\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validation Error"));
     }
 
     @Test
-    void loginRejectsInvalidCredentials() throws Exception {
+    void loginRejectsInvalidCredentialsWith401() throws Exception {
         when(authenticateUserUseCase.authenticate(any(), any()))
-                .thenThrow(new IllegalArgumentException("Invalid credentials"));
+                .thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(post("/auth/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"user@example.com\",\"password\":\"wrong\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Invalid credentials"));
     }
 }

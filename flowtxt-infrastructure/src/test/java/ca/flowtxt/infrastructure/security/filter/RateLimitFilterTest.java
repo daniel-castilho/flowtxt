@@ -1,6 +1,7 @@
 package ca.flowtxt.infrastructure.security.filter;
 
 import ca.flowtxt.infrastructure.config.properties.RateLimitProperties;
+import ca.flowtxt.infrastructure.security.handler.RestErrorResponseWriter;
 import ca.flowtxt.infrastructure.security.ratelimit.FixedWindowRateLimiter;
 import ca.flowtxt.infrastructure.security.ratelimit.RateLimitVerdict;
 import jakarta.servlet.FilterChain;
@@ -13,13 +14,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.List;
 
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,16 +41,16 @@ class RateLimitFilterTest {
     private FilterChain filterChain;
 
     @Mock
-    private PrintWriter printWriter;
+    private FixedWindowRateLimiter rateLimiter;
 
     @Mock
-    private FixedWindowRateLimiter rateLimiter;
+    private RestErrorResponseWriter errorResponseWriter;
 
     private RateLimitFilter filter;
 
     @BeforeEach
     void setUp() {
-        filter = new RateLimitFilter(PROPERTIES, rateLimiter);
+        filter = new RateLimitFilter(PROPERTIES, rateLimiter, errorResponseWriter);
     }
 
     @Test
@@ -64,6 +64,7 @@ class RateLimitFilterTest {
 
         verify(filterChain).doFilter(request, response);
         verify(response, never()).setStatus(anyInt());
+        verifyNoInteractions(errorResponseWriter);
     }
 
     @Test
@@ -72,13 +73,17 @@ class RateLimitFilterTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getRemoteAddr()).thenReturn("10.0.0.5");
         when(rateLimiter.tryAcquire(anyString())).thenReturn(RateLimitVerdict.reject(42));
-        when(response.getWriter()).thenReturn(printWriter);
 
         filter.doFilter(request, response, filterChain);
 
         verify(response).setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         verify(response).setHeader("Retry-After", "42");
-        verify(printWriter).write("Too many requests. Please try again later.");
+        verify(errorResponseWriter).write(
+                eq(request),
+                eq(response),
+                eq(HttpStatus.TOO_MANY_REQUESTS),
+                eq("Too Many Requests"),
+                eq("Too many requests. Please try again later."));
         verifyNoInteractions(filterChain);
     }
 
@@ -98,12 +103,13 @@ class RateLimitFilterTest {
     void doFilter_whenDisabled_continuesChainWithoutThrottling() throws Exception {
         RateLimitProperties disabled = new RateLimitProperties(
                 false, 20, Duration.ofMinutes(1), List.of("/auth/login"), "X-Forwarded-For");
-        RateLimitFilter disabledFilter = new RateLimitFilter(disabled, rateLimiter);
+        RateLimitFilter disabledFilter = new RateLimitFilter(disabled, rateLimiter, errorResponseWriter);
 
         disabledFilter.doFilter(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
         verifyNoInteractions(rateLimiter);
+        verifyNoInteractions(errorResponseWriter);
     }
 
     @Test
@@ -114,5 +120,6 @@ class RateLimitFilterTest {
 
         verify(filterChain).doFilter(request, response);
         verifyNoInteractions(rateLimiter);
+        verifyNoInteractions(errorResponseWriter);
     }
 }

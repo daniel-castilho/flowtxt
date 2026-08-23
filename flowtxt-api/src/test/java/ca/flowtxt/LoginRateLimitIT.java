@@ -48,7 +48,7 @@ class LoginRateLimitIT extends AbstractIntegrationTest {
                         .header("X-Forwarded-For", clientIp)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"ghost@example.com\",\"password\":\"wrong-password\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

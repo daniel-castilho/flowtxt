@@ -1,6 +1,9 @@
 package ca.flowtxt.application.usecase;
 
+import ca.flowtxt.application.port.in.AuthResult;
+import ca.flowtxt.application.port.out.AuthenticationTokenPort;
 import ca.flowtxt.application.port.out.UserRepository;
+import ca.flowtxt.domain.common.ConflictException;
 import ca.flowtxt.domain.model.PasswordHasher;
 import ca.flowtxt.domain.model.Role;
 import ca.flowtxt.domain.model.User;
@@ -30,39 +33,48 @@ class RegisterUserUseCaseImplTest {
     @Mock
     private PasswordHasher passwordHasher;
 
+    @Mock
+    private AuthenticationTokenPort authenticationTokenPort;
+
     private RegisterUserUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new RegisterUserUseCaseImpl(userRepository, passwordHasher);
+        useCase = new RegisterUserUseCaseImpl(
+                userRepository, passwordHasher, authenticationTokenPort);
     }
 
     @Test
-    void registersANewUserWithHashedPasswordAndUserRole() {
+    void registersANewUserWithHashedPasswordUserRoleAndToken() {
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
         when(passwordHasher.hash("strongpass123")).thenReturn("hashed-value");
+        when(authenticationTokenPort.issueToken(any())).thenReturn("jwt-token");
 
-        User user = useCase.register("  User@Example.COM  ", "strongpass123");
+        AuthResult result = useCase.register("  User@Example.COM  ", "strongpass123");
 
+        User user = result.user();
         assertEquals("user@example.com", user.getEmail());
         assertEquals("hashed-value", user.getPasswordHash());
         assertEquals(Role.USER, user.getRole());
+        assertEquals("jwt-token", result.token());
         assertNotEquals("strongpass123", user.getPasswordHash());
 
         verify(userRepository).save(argThat(u ->
                 u.getEmail().equals("user@example.com")
                         && u.getPasswordHash().equals("hashed-value")));
+        verify(authenticationTokenPort).issueToken(user);
     }
 
     @Test
-    void rejectsDuplicateEmail() {
+    void rejectsDuplicateEmailAsConflict() {
         when(userRepository.findByEmail("taken@example.com"))
                 .thenReturn(Optional.of(User.register("taken@example.com", "stored-hash")));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ConflictException.class,
                 () -> useCase.register("taken@example.com", "strongpass123"));
 
         verify(userRepository, never()).save(any());
+        verify(authenticationTokenPort, never()).issueToken(any());
     }
 
     @Test
