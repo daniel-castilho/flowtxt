@@ -22,19 +22,18 @@
     </properties>
 
     <dependencies>
-                <!-- Health indicators + Actuator (Health/HealthIndicator are referenced
-             by PostgresHealthIndicator; the auto-configuration lives in api). -->
+        <dependency>
+            <groupId>ca.flowtxt</groupId>
+            <artifactId>flowtxt-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Health indicators + Actuator (Health/HealthIndicator referenced
+             by PostgresHealthIndicator; actuator auto-configuration runs in
+             the api module). -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-actuator-autoconfigure</artifactId>
         </dependency>
 
         <!-- Bean Validation (ConstraintViolationException in GlobalExceptionHandler). -->
@@ -43,17 +42,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Jackson 3 (tools.jackson.*) for the shared ErrorResponse /
+        <!-- Jackson 3 (tools.jackson.*) for ErrorResponse /
              RestErrorResponseWriter used by the security filters/handlers.
-             Boot 4 ships Jackson 3 via the -json-3 starter. -->
+             Spring Boot 4 manages these tools.jackson.* artifacts via the
+             spring-boot-dependencies BOM. -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-json-3</artifactId>
+            <groupId>tools.jackson</groupId>
+            <artifactId>jackson-annotations</artifactId>
         </dependency>
-<dependency>
-            <groupId>ca.flowtxt</groupId>
-            <artifactId>flowtxt-application</artifactId>
-            <version>${project.version}</version>
+        <dependency>
+            <groupId>tools.jackson</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- Spring Data JPA + PostgreSQL + Flyway -->
