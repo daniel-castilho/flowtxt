@@ -228,6 +228,11 @@ Rollback = re-run against the previous immutable tag. The Maven version stays
 - Quality gates green: unit tests, SpotBugs (all modules), JaCoCo ≥ 0.40 per module
   (actual line coverage: domain 87.6%, application 100%, infrastructure 57.4%, api 95.9%),
   full CI/CD and governance docs.
+- **Supply-chain gates** (`docs/ci-vulnerability-gates.md`): Trivy runs two passes per
+  build — a full-SARIF advisory trail into the Security tab plus a table-format gate that
+  fails only on fixable HIGH/CRITICAL CVEs (trivy-action ignores severity filters in SARIF
+  mode); OWASP Dependency Check is resilient to NVD API outages (`failOnError=false`
+  degrades to scanning the cached mirror instead of breaking CI).
 - 106 unit tests + 12 integration tests; Maven wrapper; Dockerfile (non-root); Redis in compose.
 - Sources are 100% English (identifiers, comments, logs); legacy Portuguese comments removed.
 

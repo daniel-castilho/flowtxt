@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+- **Runbook `docs/ci-vulnerability-gates.md`**: portable recipe (symptoms → root causes →
+  copy-paste fixes → verification checklist) for the two supply-chain gates — the
+  trivy-action SARIF severity gotcha and NVD-outage-resilient Dependency Check — so other
+  projects hitting the same GitHub Actions failures can apply them directly.
+
 ### Changed
 - **Repository hygiene after the excellence merge**: removed the obsolete "AuthController injects
   infrastructure `JwtService`" item from AGENTS.md Known Technical Debt (the coupling is gone —

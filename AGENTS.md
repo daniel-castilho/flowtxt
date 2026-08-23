@@ -60,7 +60,7 @@ relevant parts before starting any task.
 | Run integration tests explicitly (needs Docker) | `./mvnw test -Dtest='*IT' -Dsurefire.failIfNoSpecifiedTests=false` |
 | Coverage report + check | `./mvnw jacoco:report` / `./mvnw jacoco:check` |
 | SpotBugs static analysis | `./mvnw spotbugs:check` |
-| OWASP Dependency Check | `./mvnw dependency-check:check -DfailBuildOnAnyVulnerability=false` |
+| OWASP Dependency Check | `./mvnw dependency-check:check` |
 | Production build | `./mvnw clean package` |
 | Start external services (PostgreSQL + Redis) | `docker compose -f docker/docker-compose.yaml up -d` |
 | Interactive API docs | http://localhost:8080/swagger-ui.html |
@@ -95,6 +95,11 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 - `SendMessageUseCaseImpl` persists twice by design (PENDING audit trail, then SENT/FAILED);
   provider failures are handled with a FAILED transition since 2026-08-21.
 - `jjwt-jackson` still pulls Jackson 2 transitively for token serialization while the app runs Jackson 3; swap modules when jjwt ships a Jackson 3-compatible one.
+- Dockerfile base images are digest-pinned, so Ubuntu security patches (e.g. curl
+  CVE-2026-11856, MEDIUM) only land on re-pinning the digest manually; fixable MEDIUM
+  library alerts (`jackson-databind` 2.21.4 → 2.21.5 via jjwt, `netty-codec-dns`
+  4.2.15.Final → 4.2.16.Final, `log4j-api` 2.25.4 → 2.25.5) are also open. None gate CI
+  (policy is HIGH/CRITICAL); consider Renovate/Dependabot + version pins as a batch.
 
 > Resolved 2026-08-22 (latest): api→infrastructure coupling beyond the composition root is gone —
 > `AuthController` no longer injects the infrastructure `JwtService`; register/login go through

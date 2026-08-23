@@ -131,3 +131,36 @@ package settings), `gh release create`, artifact layout assumptions — containe
 **Rule:** before pushing workflow changes, run actionlint + simulate every new `run:` block per
 trajectory; rehearse on `workflow_dispatch`; state precisely which risks only a real event can
 retire.
+
+---
+
+## trivy-action ignores the severity filter in SARIF mode — split report from gate (2026-08-23)
+
+The image job failed with exit-code 1 while every uploaded alert was MEDIUM. With
+`format: sarif`, aquasecurity/trivy-action drops the `--severity` flag entirely ("Building
+SARIF report with all severities") and evaluates `exit-code` over the UNFILTERED result set
+([trivy-action#309](https://github.com/aquasecurity/trivy-action/issues/309)) — so
+`severity: HIGH,CRITICAL` + `exit-code: '1'` failed on any fixable LOW/MEDIUM CVE, and the
+SARIF evidence contradicted the failure, burning diagnosis time.
+
+**Rule:** never combine `format: sarif` with `severity` + `exit-code` expecting policy
+enforcement. Split into a non-blocking full-SARIF report pass plus a table-format gate pass
+where the severity filter IS respected (same cache dir, second scan is cheap).
+`limit-severities-for-sarif: true` works but hides lower severities from the Security tab.
+
+---
+
+## NVD outages are normal — degrade Dependency Check instead of failing CI (2026-08-23)
+
+Since NVD's June 2026 schema migration (~95% of records re-touched), delta pulls are huge
+and the API answers 429/503 in storms. dependency-check's default retry delay is 0 ms
+([DependencyCheck#8469](https://github.com/dependency-check/DependencyCheck/issues/8469)),
+so ~31 immediate retries make throttling worse; an update aborted mid-write can corrupt the
+cached H2 mirror (`MVStoreException`). The build gate died even though reporting itself is
+fail-soft (`failBuildOnCVSS=11`) — the only fatal path was the NVD update error.
+
+**Rule:** run `dependency-check:check` with `failOnError=false` in CI so an unreachable NVD
+degrades to scanning the cached mirror (stale-but-logged) instead of breaking builds; keep
+a second scanner (Trivy gate) as the hard image-level stop; rotate the cache key if a
+corrupt H2 ever gets persisted. Full recipe incl. the data-feed-mirror fallback:
+`docs/ci-vulnerability-gates.md`.
