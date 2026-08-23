@@ -227,7 +227,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # No checkout in this job — only downloaded artifacts. gh infers
+          # the repository from .git, so the context must be explicit.
           gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
             --verify-tag \
             --generate-notes \
             release-assets/*

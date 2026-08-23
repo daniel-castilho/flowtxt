@@ -24,6 +24,10 @@ All notable changes to this project are documented in this file. The format is b
   described the Testcontainers stack as Mongo instead of PostgreSQL).
 
 ### Fixed
+  - **The GitHub Release job could never create a release**: it runs without a checkout
+    (downloads artifacts only), so `gh release create` had no `.git` to infer the repository
+    from (`fatal: not a git repository`). The command now passes `--repo "$GITHUB_REPOSITORY"`
+    explicitly; surfaced by the very first `v*` tag.
 - **CI red on `main` for two independent reasons**:
   - The Trivy image scan failed on fixable MEDIUM CVEs although the policy is
     HIGH/CRITICAL — with `format: sarif`, trivy-action ignores the `severity`
