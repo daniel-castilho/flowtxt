@@ -94,9 +94,13 @@ implements the ports; `api` is thin composition. Controllers call `port/in` inte
 
 - `SendMessageUseCaseImpl` persists twice by design (PENDING audit trail, then SENT/FAILED);
   provider failures are handled with a FAILED transition since 2026-08-21.
-- `AuthController` injects the infrastructure `JwtService` directly instead of going through an
-  application port (api→infrastructure coupling beyond the composition root).
 - `jjwt-jackson` still pulls Jackson 2 transitively for token serialization while the app runs Jackson 3; swap modules when jjwt ships a Jackson 3-compatible one.
+
+> Resolved 2026-08-22 (latest): api→infrastructure coupling beyond the composition root is gone —
+> `AuthController` no longer injects the infrastructure `JwtService`; register/login go through
+> the application port `AuthenticationTokenPort`, use cases return an `AuthResult(user, token)`,
+> and `GlobalExceptionHandler` moved to `flowtxt-infrastructure` (final state). Removed from
+> this list. See CHANGELOG.
 
 > Resolved 2026-08-21 (latest): `PhoneNumber` now enforces strict E.164 in the domain value
 > object (`+[1-9]\d{1,14}`); the DTO pattern mirrors it. Removed from this list. See CHANGELOG
