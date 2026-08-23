@@ -17,13 +17,21 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 
 /**
- * Slice-test wiring for the rate limiting stack. Throttling is disabled here
- * so controller slices exercise the controllers, not throttling — the
- * behaviour itself is covered by {@code RateLimitFilterTest},
+ * Slice-test wiring for the security stack. Throttling is disabled here so
+ * controller slices exercise the controllers, not throttling — the behaviour
+ * itself is covered by {@code RateLimitFilterTest},
  * {@code FixedWindowRateLimiterTest} and {@code LoginRateLimitIT}.
+ *
+ * <p>The Twilio auth token is a known non-blank test value: webhook slices
+ * sign callbacks with it (see {@code TwilioWebhookControllerTest}) while the
+ * signature filter's fail-closed contract is covered separately by
+ * {@code TwilioWebhookSecurityTest}.</p>
  */
 @TestConfiguration(proxyBeanMethods = false)
 public class RateLimitSliceTestConfig {
+
+    /** Shared slice token; TwilioWebhookControllerTest signs with the same value. */
+    public static final String TWILIO_AUTH_TOKEN = "slice-webhook-token";
 
     @Bean
     public RateLimitProperties rateLimitProperties() {
@@ -31,13 +39,9 @@ public class RateLimitSliceTestConfig {
                 false, 20, Duration.ofMinutes(1), List.of("/auth/login"), "X-Forwarded-For");
     }
 
-    /**
-     * Blank Twilio token on purpose: the signature filter fails closed per
-     * request, matching dev semantics; slices never exercise real webhooks.
-     */
     @Bean
     public TwilioProperties twilioProperties() {
-        return new TwilioProperties("", "", "");
+        return new TwilioProperties("AC-slice-account", TWILIO_AUTH_TOKEN, "+15550000000");
     }
 
     @Bean
