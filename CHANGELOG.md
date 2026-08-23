@@ -6,6 +6,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+- **Repository hygiene after the excellence merge**: removed the obsolete "AuthController injects
+  infrastructure `JwtService`" item from AGENTS.md Known Technical Debt (the coupling is gone —
+  auth flows through the `AuthenticationTokenPort` application port and use cases return
+  `AuthResult`; the resolved entry now records this); deleted the accidentally committed
+  `.excellence-backup-20260823T000151Z/` snapshot (28 files of pre-change copies) and added
+  `.excellence-backup*/` to `.gitignore`; fixed a duplicated `TestRestTemplate` import in
+  `AbstractHttpIntegrationTest` left over from the Boot 4 module migration; corrected remaining
+  documentation drift (`docs/testing-playbook.md` said Spring Boot 3.5, `docs/lessons.md`
+  described the Testcontainers stack as Mongo instead of PostgreSQL).
+
 ### Fixed
 - **The reactor could not even read its POMs**: commit `a40fbd1` declared Jackson 3 under the
   non-existent `tools.jackson:jackson-annotations` / `tools.jackson:jackson-databind`
