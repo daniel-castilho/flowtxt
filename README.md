@@ -7,6 +7,7 @@
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 FlowTXT is an **SMS delivery backend** built with **Java 21**, **Spring Boot 4.1** and a strict
 **Clean Architecture** (multi-module: domain / application / infrastructure / api). It manages
@@ -34,6 +35,9 @@ authentication.
 - [Releases & Rollout](#releases--rollout)
 - [Current State](#current-state)
 - [Roadmap](#roadmap)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Tech Stack
 
@@ -154,8 +158,8 @@ Interactive docs (Swagger UI): http://localhost:8080/swagger-ui.html.
 
 ## Testing
 
-Pyramid of **75 unit tests** (domain → application → infrastructure → API slice) plus
-**7 integration tests** (`*IT`, Testcontainers with real PostgreSQL + Redis) covering repository
+Pyramid of **106 unit tests** (domain → application → infrastructure → API slice) plus
+**12 integration tests** (`*IT`, Testcontainers with real PostgreSQL + Redis) covering repository
 adapters, the cache, login rate limiting and the end-to-end security flow. Full guidance:
 [docs/testing-playbook.md](docs/testing-playbook.md).
 
@@ -206,6 +210,9 @@ Rollback = re-run against the previous immutable tag. The Maven version stays
 
 ## Current State
 
+**Latest tagged release: `v1.0.0`** (2026-08-23) · development continues on `main`
+(see [CHANGELOG.md](CHANGELOG.md) → Unreleased).
+
 - JWT auth (register/login + protected routes; missing tokens get a proper 401), user
   persistence in PostgreSQL.
 - **Rich immutable domain model**: entities with behaviour (`Message` guards its forward-only
@@ -222,9 +229,9 @@ Rollback = re-run against the previous immutable tag. The Maven version stays
   (first `X-Forwarded-For` hop, else remote address); beyond `rate-limit.limit` requests get
   `429` + `Retry-After`. Atomic Lua script (no orphan keys), shared across replicas, fails open
   (with a WARN log) if Redis is unavailable. Configurable via `RATE_LIMIT_*` env vars.
- - Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
-   `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route is permitAll behind the
-   fail-closed `X-Twilio-Signature` validation filter (explicit SecurityConfig rule).
+- Twilio delivery-status webhook (`POST /webhook/twilio/status`) wired through
+  `UpdateMessageStatusUseCase`; unknown statuses map to `UNKNOWN`. Route is permitAll behind the
+  fail-closed `X-Twilio-Signature` validation filter (explicit SecurityConfig rule).
 - Quality gates green: unit tests, SpotBugs (all modules), JaCoCo ≥ 0.40 per module
   (actual line coverage: domain 87.6%, application 100%, infrastructure 57.4%, api 95.9%),
   full CI/CD and governance docs.
@@ -241,3 +248,30 @@ Rollback = re-run against the previous immutable tag. The Maven version stays
 Deliberately not implemented yet (candidate backlog — see `tasks/`):
 
 - Raise the JaCoCo coverage target further (0.40 → 0.50+) as the suite grows.
+
+## Documentation
+
+| Document | Purpose |
+| :--- | :--- |
+| [AGENTS.md](AGENTS.md) | Rules for AI agents and human contributors |
+| [docs/coding-standards.md](docs/coding-standards.md) | Day-to-day coding standards (Java / Spring Boot / Maven) |
+| [docs/testing-playbook.md](docs/testing-playbook.md) | Test taxonomy, principles, patterns, regression checklist & smoke |
+| [docs/twelve-factor.md](docs/twelve-factor.md) | Twelve-Factor App reference & compliance matrix |
+| [docs/lessons.md](docs/lessons.md) | Durable engineering lessons |
+| [docs/data-model-decisions.md](docs/data-model-decisions.md) | Recorded data-model decisions with alternatives |
+| [docs/adr/0001-jwt-authentication.md](docs/adr/0001-jwt-authentication.md) | ADR: JWT authentication design |
+| [docs/release-runbook.md](docs/release-runbook.md) | Release, deploy, rollback, backup/restore procedures |
+| [docs/ci-vulnerability-gates.md](docs/ci-vulnerability-gates.md) | Portable runbook for the supply-chain CI gates |
+| [CHANGELOG.md](CHANGELOG.md) | Release history (Keep a Changelog) |
+
+## Contributing
+
+FlowTXT is developed solo/AI-assisted, but PRs are welcome. Before contributing, read
+[AGENTS.md](AGENTS.md) (rules for both humans and agents), the
+[coding standards](docs/coding-standards.md) and the
+[testing playbook](docs/testing-playbook.md). Keep the default suite green
+(`./mvnw test`) and update `README.md` / `CHANGELOG.md` in the same change set (AGENTS.md rule 8).
+
+## License
+
+[MIT](LICENSE) © 2026 Daniel Castilho.
